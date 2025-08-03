@@ -178,7 +178,10 @@ function translateWord(word) {
     
     let translateUrl;
     
-    if (selectedAPI === 'bing') {
+    if (selectedAPI === 'shyyp') {
+        // 使用粤语字典（仅限粤语）
+        translateUrl = `https://shyyp.net/search?q=${encodeURIComponent(word)}`;
+    } else if (selectedAPI === 'bing') {
         // 使用 Bing 翻译
         if (selectedLanguage === 'en') {
             // 中文到英语
@@ -200,6 +203,25 @@ function translateWord(word) {
     
     // 在新窗口打开翻译链接
     window.open(translateUrl, '_blank');
+}
+
+// 切换API选项的显示和隐藏
+function toggleApiOptions() {
+    const selectedLanguage = document.querySelector('input[name="language"]:checked').value;
+    const shyypOption = document.getElementById('apiShyypOption');
+    const shyypRadio = document.getElementById('apiShyyp');
+    
+    if (selectedLanguage === 'hk') {
+        // 粤语时显示第三个选项
+        shyypOption.style.display = 'block';
+    } else {
+        // 英语时隐藏第三个选项
+        shyypOption.style.display = 'none';
+        // 如果当前选中的是第三个选项，则切换到Google
+        if (shyypRadio.checked) {
+            document.getElementById('apiGoogle').checked = true;
+        }
+    }
 }
 
 // 格式化日期为YYYY-MM-DD
@@ -274,6 +296,15 @@ document.addEventListener('DOMContentLoaded', () => {
             loadAndDisplayWords(selectedDate);
         }
     });
+    
+    // 监听语言切换
+    const languageRadios = document.querySelectorAll('input[name="language"]');
+    languageRadios.forEach(radio => {
+        radio.addEventListener('change', toggleApiOptions);
+    });
+    
+    // 初始化API选项显示状态
+    toggleApiOptions();
     
     // 初始加载今天的词汇
     loadAndDisplayWords(today);
