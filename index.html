@@ -233,6 +233,46 @@
                 min-width: 60px;
             }
         }
+        
+        /* 版权框样式 */
+        .footer {
+            margin-top: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 2px solid #e9ecef;
+        }
+        
+        .copyright {
+            font-size: 14px;
+            color: #666;
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+        }
+        
+        .copyright a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .copyright a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .footer {
+                margin-top: 20px;
+                padding: 15px;
+            }
+            
+            .copyright {
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -275,6 +315,13 @@
     
     <div id="copySuccess" class="copy-success">
         词汇已复制到剪贴板！
+    </div>
+
+    <!-- 版权框 -->
+    <div class="footer">
+        <div class="copyright">
+            Daily Words © <span id="currentYear"></span> <a href="https://guomaimang.github.io/" target="_blank">Hirsun</a>
+        </div>
     </div>
 
     <script src="script.js"></script>

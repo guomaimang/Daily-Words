@@ -259,6 +259,10 @@ function loadAndDisplayWords(selectedDate) {
 document.addEventListener('DOMContentLoaded', () => {
     const dateInput = document.getElementById('dateInput');
     
+    // 设置版权年份
+    const currentYear = new Date().getFullYear();
+    document.getElementById('currentYear').textContent = currentYear;
+    
     // 设置默认日期为今天
     const today = getTodayString();
     dateInput.value = today;
