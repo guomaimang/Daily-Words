@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日词汇</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .date-selector {
+            margin: 20px 0;
+        }
+        .date-selector label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .date-selector input[type="date"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .language-selector {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .language-selector label {
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .radio-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .radio-item input[type="radio"] {
+            margin: 0;
+            transform: scale(1.2);
+        }
+        .radio-item label {
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+            margin: 0;
+            cursor: pointer;
+        }
+        .api-selector {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .api-selector label {
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .word-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .info-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 14px;
+            color: #666;
+        }
+        .word-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .word-table thead {
+            background: #e9ecef;
+            font-weight: bold;
+        }
+        .word-table th,
+        .word-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .word-table th {
+            font-weight: 600;
+            color: #495057;
+            position: sticky;
+            top: 0;
+            background: #e9ecef;
+            z-index: 10;
+        }
+        .word-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .word-table tbody tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+        .word-table tbody tr:nth-child(even):hover {
+            background-color: #f8f9fa;
+        }
+        .word-column {
+            font-weight: 600;
+            color: #212529;
+            min-width: 120px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .word-column:hover {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        .pinyin-column {
+            color: #6c757d;
+            font-family: 'Consolas', 'Monaco', monospace;
+            min-width: 140px;
+        }
+        .frequency-column {
+            color: #868e96;
+            text-align: right;
+            cursor: pointer;
+            min-width: 80px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .frequency-column:hover {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            font-weight: bold;
+        }
+        .frequency-column:active {
+            background-color: #bbdefb;
+        }
+        .copy-tooltip {
+            position: absolute;
+            top: 50%;
+            right: 5px;
+            transform: translateY(-50%);
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+        }
+        .frequency-column:hover .copy-tooltip {
+            opacity: 1;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+            padding: 40px;
+        }
+        .table-container {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .copy-success {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        .copy-success.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .language-selector, .api-selector {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .language-selector label, .api-selector label {
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+            .radio-group {
+                justify-content: center;
+            }
+            .word-table th,
+            .word-table td {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+            .word-column {
+                min-width: 80px;
+            }
+            .pinyin-column {
+                min-width: 100px;
+            }
+            .frequency-column {
+                min-width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>每日词汇</h1>
+        <div class="date-selector">
+            <label for="dateInput">选择日期：</label>
+            <input type="date" id="dateInput">
+        </div>
+        <div class="api-selector">
+            <label>翻译 API：</label>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" id="apiGoogle" name="apiChoice" value="google" checked>
+                    <label for="apiGoogle">Google</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="apiBing" name="apiChoice" value="bing">
+                    <label for="apiBing">Bing</label>
+                </div>
+            </div>
+        </div>
+        <div class="language-selector">
+            <label>翻译语言：</label>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" id="langHK" name="language" value="hk" checked>
+                    <label for="langHK">粤语 (HK)</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="langEN" name="language" value="en">
+                    <label for="langEN">英语 (EN)</label>
+                </div>
+            </div>
+        </div>
+        <p>选择特定日期，每天都会显示相同的100个词汇。点击词汇可使用所选API翻译。</p>
+    </div>
+    
+    <div id="output" class="loading">正在加载词汇...</div>
+    
+    <div id="copySuccess" class="copy-success">
+        词汇已复制到剪贴板！
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
