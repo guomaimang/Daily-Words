@@ -122,22 +122,45 @@ function showCopySuccess() {
 // 创建词汇网格HTML
 function createWordGrid(wordList, selectedDate, seed) {
     // 获取当前显示模式
-    const displayMode = document.querySelector('input[name="displayMode"]:checked')?.value || 'click';
-    const showTranslation = displayMode === 'show';
+    const displayMode = document.querySelector('input[name="displayMode"]:checked')?.value || 'english';
+    
+    let cardClass = '';
+    let showEnglish = true;
+    let showChinese = false;
+    
+    switch(displayMode) {
+        case 'chinese':
+            cardClass = 'chinese-only';
+            showEnglish = false;
+            showChinese = true;
+            break;
+        case 'both':
+            cardClass = 'show-translation';
+            showEnglish = true;
+            showChinese = true;
+            break;
+        case 'english':
+        default:
+            cardClass = '';
+            showEnglish = true;
+            showChinese = false;
+            break;
+    }
     
     const gridHTML = `
         <div class="word-container">
             <div class="info-header">
                 <strong>Date:</strong> ${selectedDate} &nbsp;&nbsp;
                 <strong>Seed:</strong> ${seed} &nbsp;&nbsp;
-                <strong>Words:</strong> ${wordList.length}
+                <strong>Words:</strong> ${wordList.length} &nbsp;&nbsp;
+                <strong>Mode:</strong> ${displayMode === 'english' ? 'English Only' : displayMode === 'chinese' ? 'Chinese Only' : 'Both Languages'}
             </div>
             <div class="word-grid">
                 ${wordList.map((item, index) => `
-                    <div class="word-card ${showTranslation ? 'show-translation' : ''}" data-word="${escapeHtmlAttr(item.word)}" data-translation="${escapeHtmlAttr(item.translation)}" data-index="${index}">
+                    <div class="word-card ${cardClass}" data-word="${escapeHtmlAttr(item.word)}" data-translation="${escapeHtmlAttr(item.translation)}" data-index="${index}">
                         <div class="word-id">${escapeHtml(item.id)}</div>
-                        <div class="word-text">${escapeHtml(item.word)}</div>
-                        ${showTranslation ? `<div class="word-translation">${escapeHtml(item.translation)}</div>` : ''}
+                        ${showEnglish ? `<div class="word-text">${escapeHtml(item.word)}</div>` : ''}
+                        ${showChinese ? `<div class="word-translation">${escapeHtml(item.translation)}</div>` : ''}
                     </div>
                 `).join('')}
             </div>
@@ -175,15 +198,8 @@ function escapeJs(text) {
 
 // 处理词汇点击事件
 function handleWordClick(word, translation) {
-    const displayMode = document.querySelector('input[name="displayMode"]:checked')?.value || 'click';
-    
-    if (displayMode === 'show') {
-        // 如果已经显示翻译，仍然可以点击打开模态框获取更多操作
-        showTranslation(word, translation);
-    } else {
-        // 点击显示模式，直接显示模态框
-        showTranslation(word, translation);
-    }
+    // 无论当前显示模式如何，点击都显示完整的模态框
+    showTranslation(word, translation);
 }
 
 // 显示翻译模态框

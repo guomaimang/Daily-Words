@@ -6,172 +6,213 @@
     <title>IELTS Daily Words</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f8f9fa;
-            line-height: 1.6;
+            padding: 24px;
+            background-color: #fafbfc;
+            line-height: 1.5;
         }
         .header {
-            text-align: center;
-            margin-bottom: 30px;
             background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 32px 40px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 32px;
         }
         .header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 2.5rem;
-            font-weight: 700;
+            color: #1d2329;
+            margin: 0 0 12px 0;
+            font-size: 2.25rem;
+            font-weight: 600;
+            text-align: center;
         }
         .header p {
-            color: #6c757d;
-            font-size: 1.1rem;
-            margin-bottom: 20px;
+            color: #656d76;
+            font-size: 1rem;
+            margin: 0 0 32px 0;
+            text-align: center;
         }
+        
+        /* 统一的表单控件容器 */
+        .form-section {
+            margin-bottom: 24px;
+        }
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* 日期选择器样式 */
         .date-selector {
-            margin: 20px 0;
-        }
-        .date-selector label {
-            font-weight: bold;
-            margin-right: 10px;
-            color: #495057;
-        }
-        .date-selector input[type="date"] {
-            padding: 10px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-        .date-selector input[type="date"]:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
-        }
-        .api-selector {
-            margin: 20px 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px;
+            gap: 16px;
         }
-        .api-selector label {
-            font-weight: bold;
-            margin-right: 15px;
-            color: #495057;
-        }
-        .radio-group {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .radio-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: #f8f9fa;
-            transition: all 0.3s ease;
-        }
-        .radio-item:hover {
-            background: #e9ecef;
-        }
-        .radio-item input[type="radio"] {
-            margin: 0;
-            transform: scale(1.2);
-        }
-        .radio-item label {
+        .date-selector label {
             font-weight: 500;
-            color: #495057;
+            color: #1d2329;
+            white-space: nowrap;
+        }
+        .date-selector input[type="date"] {
+            padding: 8px 12px;
+            border: 1px solid #d1d9e0;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1d2329;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+        .date-selector input[type="date"]:focus {
+            outline: none;
+            border-color: #0969da;
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+        }
+        
+        /* 选项组样式 */
+        .option-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .option-group .group-label {
+            font-weight: 500;
+            color: #1d2329;
+            white-space: nowrap;
+            min-width: 140px;
+            text-align: right;
+        }
+        .option-group .choices {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .choice-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: #f6f8fa;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .choice-item:hover {
+            background: #ebeef2;
+        }
+        .choice-item input[type="radio"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+        }
+        .choice-item label {
+            font-weight: 400;
+            color: #656d76;
             font-size: 14px;
             margin: 0;
             cursor: pointer;
+            white-space: nowrap;
         }
-        .radio-item input[type="radio"]:checked + label {
-            color: #007bff;
-            font-weight: 600;
+        .choice-item input[type="radio"]:checked + label {
+            color: #0969da;
+            font-weight: 500;
+        }
+        .choice-item:has(input[type="radio"]:checked) {
+            background: #dbeafe;
+            border-color: #0969da;
         }
 
         .word-container {
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             overflow: hidden;
         }
         .info-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
+            background: #f6f8fa;
+            border-bottom: 1px solid #d1d9e0;
+            color: #656d76;
+            padding: 16px 24px;
             font-size: 14px;
+            font-weight: 500;
         }
         .word-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            padding: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            padding: 24px;
         }
         .word-card {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
+            background: #fafbfc;
+            border: 1px solid #d1d9e0;
+            border-radius: 8px;
             padding: 20px;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             cursor: pointer;
             position: relative;
         }
         .word-card:hover {
-            background: #e3f2fd;
-            border-color: #2196f3;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(33,150,243,0.2);
+            background: white;
+            border-color: #0969da;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.15);
         }
         .word-text {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 10px;
+            font-size: 1.375rem;
+            font-weight: 500;
+            color: #1d2329;
+            margin: 0 0 8px 0;
         }
         .word-translation {
-            font-size: 1rem;
-            color: #6c757d;
+            font-size: 0.875rem;
+            color: #656d76;
             line-height: 1.4;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #e9ecef;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #d1d9e0;
             display: none;
         }
         .word-card.show-translation .word-translation {
             display: block;
         }
         .word-card.show-translation {
-            min-height: 120px;
+            min-height: 110px;
+        }
+        .word-card.chinese-only .word-text {
+            display: none;
+        }
+        .word-card.chinese-only .word-translation {
+            display: block;
+            border-top: none;
+            margin-top: 0;
+            padding-top: 0;
+            font-size: 1.25rem;
+            color: #1d2329;
+            font-weight: 500;
         }
         .word-id {
             position: absolute;
-            top: 10px;
-            right: 15px;
-            background: #6c757d;
+            top: 8px;
+            right: 12px;
+            background: #656d76;
             color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
             font-weight: 500;
         }
         .loading {
             text-align: center;
-            color: #6c757d;
-            font-size: 18px;
-            padding: 60px;
+            color: #656d76;
+            font-size: 16px;
+            padding: 48px;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
 
         /* 模态框样式 */
@@ -183,23 +224,23 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
+            background-color: rgba(13, 17, 23, 0.5);
+            backdrop-filter: blur(4px);
         }
         .modal-content {
             background-color: white;
-            margin: 5% auto;
+            margin: 8% auto;
             padding: 0;
-            border-radius: 20px;
+            border-radius: 12px;
             width: 90%;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: modalSlideIn 0.3s ease;
+            max-width: 480px;
+            box-shadow: 0 16px 70px rgba(13, 17, 23, 0.3);
+            animation: modalSlideIn 0.2s ease;
         }
         @keyframes modalSlideIn {
             from {
                 opacity: 0;
-                transform: translateY(-50px) scale(0.9);
+                transform: translateY(-20px) scale(0.95);
             }
             to {
                 opacity: 1;
@@ -207,102 +248,112 @@
             }
         }
         .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 20px 20px 0 0;
+            background: #f6f8fa;
+            border-bottom: 1px solid #d1d9e0;
+            color: #1d2329;
+            padding: 20px 24px;
+            border-radius: 12px 12px 0 0;
             position: relative;
         }
         .modal-header h2 {
             margin: 0;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 600;
+            color: #1d2329;
         }
         .close {
-            color: white;
+            color: #656d76;
             float: right;
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 20px;
+            font-weight: 600;
             cursor: pointer;
             position: absolute;
             right: 20px;
             top: 50%;
             transform: translateY(-50%);
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.3s ease;
+            transition: all 0.2s ease;
         }
         .close:hover {
-            background-color: rgba(255,255,255,0.2);
+            background-color: #ebeef2;
+            color: #1d2329;
         }
         .modal-body {
-            padding: 30px;
+            padding: 24px;
             text-align: center;
         }
         .chinese-translation {
-            font-size: 1.4rem;
-            color: #2c3e50;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #007bff;
+            font-size: 1.25rem;
+            color: #1d2329;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: #f6f8fa;
+            border-radius: 8px;
+            border-left: 3px solid #0969da;
         }
         .translation-actions {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             justify-content: center;
             margin-top: 20px;
         }
         .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 25px;
+            padding: 8px 16px;
+            border: 1px solid transparent;
+            border-radius: 6px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            background: #0969da;
             color: white;
         }
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,123,255,0.3);
+            background: #0550ae;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.25);
         }
         .btn-secondary {
-            background: linear-gradient(135deg, #6c757d, #495057);
-            color: white;
+            background: #f6f8fa;
+            color: #656d76;
+            border-color: #d1d9e0;
         }
         .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(108,117,125,0.3);
+            background: #ebeef2;
+            color: #1d2329;
+            border-color: #afb8c1;
+            transform: translateY(-1px);
         }
 
         .copy-success {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: linear-gradient(135deg, #28a745, #20c997);
+            background: #1a7f37;
             color: white;
-            padding: 15px 25px;
-            border-radius: 50px;
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(26, 127, 55, 0.25);
             z-index: 1001;
             opacity: 0;
             transform: translateX(100%);
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             font-weight: 500;
+            font-size: 14px;
         }
         .copy-success.show {
             opacity: 1;
@@ -311,73 +362,79 @@
 
         @media (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 16px;
             }
             .header {
-                padding: 20px;
+                padding: 24px 20px;
             }
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.875rem;
             }
-            .api-selector {
+            .option-group {
                 flex-direction: column;
-                gap: 15px;
+                gap: 16px;
+                align-items: stretch;
             }
-            .api-selector label {
-                margin-right: 0;
-                margin-bottom: 10px;
+            .option-group .group-label {
+                min-width: auto;
+                text-align: center;
+                margin-bottom: 8px;
             }
-            .radio-group {
+            .option-group .choices {
                 justify-content: center;
-                flex-wrap: wrap;
             }
             .word-grid {
-                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-                gap: 15px;
-                padding: 15px;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 12px;
+                padding: 16px;
             }
             .word-card {
-                padding: 15px;
+                padding: 16px;
             }
             .word-text {
-                font-size: 1.3rem;
+                font-size: 1.25rem;
             }
             .modal-content {
                 width: 95%;
-                margin: 10% auto;
+                margin: 15% auto;
             }
             .translation-actions {
-                flex-direction: column;
-                align-items: center;
+                gap: 8px;
+            }
+            .btn {
+                flex: 1;
+                max-width: 120px;
+                padding: 8px 12px;
+                font-size: 13px;
             }
         }
         
         /* 版权框样式 */
         .footer {
-            margin-top: 40px;
+            margin-top: 32px;
             padding: 20px;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             text-align: center;
-            border-top: 3px solid #667eea;
+            border-top: 2px solid #0969da;
         }
         
         .copyright {
             font-size: 14px;
-            color: #6c757d;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #656d76;
+            font-family: inherit;
         }
         
         .copyright a {
-            color: #007bff;
+            color: #0969da;
             text-decoration: none;
             font-weight: 500;
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
         }
         
         .copyright a:hover {
-            color: #0056b3;
+            color: #0550ae;
             text-decoration: underline;
         }
     </style>
@@ -386,46 +443,54 @@
     <div class="header">
         <h1>🎓 IELTS Daily Words</h1>
         <p>Select a date to see the same 100 IELTS words each day. Click on any word to see its Chinese translation.</p>
-        <div class="date-selector">
+        
+        <div class="form-section date-selector">
             <label for="dateInput">Select Date:</label>
             <input type="date" id="dateInput">
         </div>
-        <div class="api-selector">
-            <label>Translation API:</label>
-            <div class="radio-group">
-                <div class="radio-item">
+        
+        <div class="form-section option-group">
+            <span class="group-label">Translation API:</span>
+            <div class="choices">
+                <div class="choice-item">
                     <input type="radio" id="apiGoogle" name="apiChoice" value="google" checked>
                     <label for="apiGoogle">Google</label>
                 </div>
-                <div class="radio-item">
+                <div class="choice-item">
                     <input type="radio" id="apiBing" name="apiChoice" value="bing">
                     <label for="apiBing">Bing</label>
                 </div>
             </div>
         </div>
-        <div class="api-selector">
-            <label>Translation Language:</label>
-            <div class="radio-group">
-                <div class="radio-item">
+        
+        <div class="form-section option-group">
+            <span class="group-label">Translation Language:</span>
+            <div class="choices">
+                <div class="choice-item">
                     <input type="radio" id="langCN" name="language" value="cn" checked>
-                    <label for="langCN">Chinese (简体)</label>
+                    <label for="langCN">Chinese</label>
                 </div>
-                <div class="radio-item">
+                <div class="choice-item">
                     <input type="radio" id="langHK" name="language" value="hk">
-                    <label for="langHK">Cantonese (粤语)</label>
+                    <label for="langHK">Cantonese</label>
                 </div>
             </div>
         </div>
-        <div class="api-selector">
-            <label>Display Mode:</label>
-            <div class="radio-group">
-                <div class="radio-item">
-                    <input type="radio" id="modeClick" name="displayMode" value="click" checked>
-                    <label for="modeClick">Click to see translation</label>
+        
+        <div class="form-section option-group">
+            <span class="group-label">Display Mode:</span>
+            <div class="choices">
+                <div class="choice-item">
+                    <input type="radio" id="modeEnglish" name="displayMode" value="english" checked>
+                    <label for="modeEnglish">English</label>
                 </div>
-                <div class="radio-item">
-                    <input type="radio" id="modeShow" name="displayMode" value="show">
-                    <label for="modeShow">Show translation directly</label>
+                <div class="choice-item">
+                    <input type="radio" id="modeChinese" name="displayMode" value="chinese">
+                    <label for="modeChinese">Chinese</label>
+                </div>
+                <div class="choice-item">
+                    <input type="radio" id="modeBoth" name="displayMode" value="both">
+                    <label for="modeBoth">Both</label>
                 </div>
             </div>
         </div>
@@ -444,10 +509,10 @@
                 <div id="chineseTranslation" class="chinese-translation"></div>
                 <div class="translation-actions">
                     <button id="translateOnlineBtn" class="btn btn-primary">
-                        🌐 Translate Online
+                        Translate
                     </button>
                     <button id="copyWordBtn" class="btn btn-secondary">
-                        📋 Copy Word
+                        Copy
                     </button>
                 </div>
             </div>
