@@ -15,30 +15,30 @@
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             background: white;
-            padding: 20px;
+            padding: 15px 20px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: relative;
         }
         .mode-switch {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 15px;
+            left: 15px;
             background: #007bff;
             color: white;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border: none;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
         .mode-switch:hover {
             background: #0056b3;
@@ -49,7 +49,7 @@
             transform: translateY(0);
         }
         .date-selector {
-            margin: 20px 0;
+            margin: 15px 0 10px 0;
         }
         .date-selector label {
             font-weight: bold;
@@ -62,12 +62,12 @@
             font-size: 16px;
         }
         .language-selector {
-            margin: 20px 0;
+            margin: 10px 0;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 15px;
         }
         .language-selector label {
             font-weight: bold;
@@ -95,16 +95,30 @@
             cursor: pointer;
         }
         .api-selector {
-            margin: 20px 0;
+            margin: 10px 0;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 15px;
         }
         .api-selector label {
             font-weight: bold;
             margin-right: 15px;
+        }
+        
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .header h1 {
+            margin: 10px 0 15px 0;
+            font-size: 28px;
         }
 
         .word-container {
@@ -232,39 +246,70 @@
         }
         @media (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 8px;
             }
             .mode-switch {
-                top: 15px;
-                left: 15px;
+                position: static;
+                margin-bottom: 10px;
+                align-self: flex-start;
+                padding: 5px 10px;
+                font-size: 12px;
             }
             .header {
-                padding: 15px;
+                padding: 12px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+            .header h1 {
+                margin: 8px 0 10px 0;
+                font-size: 24px;
+            }
+            .date-selector {
+                margin: 8px 0;
+            }
+            .controls-row {
+                flex-direction: column;
+                gap: 12px;
+                margin: 8px 0;
             }
             .language-selector, .api-selector {
                 flex-direction: column;
-                gap: 10px;
+                gap: 8px;
+                margin: 0;
             }
             .language-selector label, .api-selector label {
                 margin-right: 0;
-                margin-bottom: 5px;
+                margin-bottom: 3px;
+                font-size: 13px;
             }
             .radio-group {
                 justify-content: center;
+                gap: 10px;
+            }
+            .radio-item label {
+                font-size: 13px;
+            }
+            .header p {
+                margin: 8px 0 3px 0 !important;
+                font-size: 13px !important;
+                padding: 0 5px;
+                text-align: center;
             }
             .word-table th,
             .word-table td {
-                padding: 8px 10px;
-                font-size: 13px;
+                padding: 6px 8px;
+                font-size: 12px;
             }
             .word-column {
-                min-width: 80px;
+                min-width: 70px;
             }
             .pinyin-column {
-                min-width: 100px;
+                min-width: 90px;
             }
             .frequency-column {
-                min-width: 60px;
+                min-width: 50px;
             }
         }
         
@@ -299,12 +344,12 @@
         
         @media (max-width: 768px) {
             .footer {
-                margin-top: 20px;
-                padding: 15px;
+                margin-top: 15px;
+                padding: 12px;
             }
             
             .copyright {
-                font-size: 13px;
+                font-size: 12px;
             }
         }
     </style>
@@ -317,37 +362,39 @@
             <label for="dateInput">选择日期：</label>
             <input type="date" id="dateInput">
         </div>
-        <div class="api-selector">
-            <label>翻译 API：</label>
-            <div class="radio-group">
-                <div class="radio-item">
-                    <input type="radio" id="apiGoogle" name="apiChoice" value="google" checked>
-                    <label for="apiGoogle">Google</label>
+        <div class="controls-row">
+            <div class="api-selector">
+                <label>翻译 API：</label>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="apiGoogle" name="apiChoice" value="google" checked>
+                        <label for="apiGoogle">Google</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="apiBing" name="apiChoice" value="bing">
+                        <label for="apiBing">Bing</label>
+                    </div>
+                    <div class="radio-item" id="apiShyypOption" style="display: block;">
+                        <input type="radio" id="apiShyyp" name="apiChoice" value="shyyp">
+                        <label for="apiShyyp">Shyyp</label>
+                    </div>
                 </div>
-                <div class="radio-item">
-                    <input type="radio" id="apiBing" name="apiChoice" value="bing">
-                    <label for="apiBing">Bing</label>
-                </div>
-                <div class="radio-item" id="apiShyypOption" style="display: block;">
-                    <input type="radio" id="apiShyyp" name="apiChoice" value="shyyp">
-                    <label for="apiShyyp">Shyyp</label>
+            </div>
+            <div class="language-selector">
+                <label>翻译语言：</label>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="langHK" name="language" value="hk" checked>
+                        <label for="langHK">粤语 (HK)</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="langEN" name="language" value="en">
+                        <label for="langEN">英语 (EN)</label>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="language-selector">
-            <label>翻译语言：</label>
-            <div class="radio-group">
-                <div class="radio-item">
-                    <input type="radio" id="langHK" name="language" value="hk" checked>
-                    <label for="langHK">粤语 (HK)</label>
-                </div>
-                <div class="radio-item">
-                    <input type="radio" id="langEN" name="language" value="en">
-                    <label for="langEN">英语 (EN)</label>
-                </div>
-            </div>
-        </div>
-        <p>选择特定日期，每天都会显示相同的100个词汇。点击词汇可使用所选API翻译。</p>
+        <p style="margin: 10px 0 5px 0; font-size: 14px; color: #666;">选择特定日期，每天都会显示相同的100个词汇。点击词汇可使用所选API翻译。</p>
     </div>
     
     <div id="output" class="loading">正在加载词汇...</div>
