@@ -20,6 +20,33 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .mode-switch {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .mode-switch:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+        .mode-switch:active {
+            transform: translateY(0);
         }
         .date-selector {
             margin: 20px 0;
@@ -207,6 +234,13 @@
             body {
                 padding: 10px;
             }
+            .mode-switch {
+                top: 15px;
+                left: 15px;
+            }
+            .header {
+                padding: 15px;
+            }
             .language-selector, .api-selector {
                 flex-direction: column;
                 gap: 10px;
@@ -277,6 +311,7 @@
 </head>
 <body>
     <div class="header">
+        <a href="ielts/index.html" class="mode-switch">🎓 切换雅思模式</a>
         <h1>每日词汇</h1>
         <div class="date-selector">
             <label for="dateInput">选择日期：</label>

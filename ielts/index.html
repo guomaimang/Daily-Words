@@ -19,6 +19,34 @@
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             margin-bottom: 32px;
+            position: relative;
+        }
+        .mode-switch {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #0969da;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .mode-switch:hover {
+            background: #0550ae;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.3);
+        }
+        .mode-switch:active {
+            transform: translateY(0);
         }
         .header h1 {
             color: #1d2329;
@@ -420,6 +448,10 @@
             body {
                 padding: 16px;
             }
+            .mode-switch {
+                top: 15px;
+                left: 15px;
+            }
             .header {
                 padding: 24px 20px;
             }
@@ -497,6 +529,7 @@
 </head>
 <body>
     <div class="header">
+        <a href="../index.html" class="mode-switch">📚 切换标准模式</a>
         <h1>🎓 IELTS Daily Words</h1>
         <p>Select a date to see the same 100 IELTS words each day. Click on any word to see its Chinese translation.</p>
         
