@@ -138,6 +138,21 @@
             color: #2c3e50;
             margin-bottom: 10px;
         }
+        .word-translation {
+            font-size: 1rem;
+            color: #6c757d;
+            line-height: 1.4;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e9ecef;
+            display: none;
+        }
+        .word-card.show-translation .word-translation {
+            display: block;
+        }
+        .word-card.show-translation {
+            min-height: 120px;
+        }
         .word-id {
             position: absolute;
             top: 10px;
@@ -398,6 +413,19 @@
                 <div class="radio-item">
                     <input type="radio" id="langHK" name="language" value="hk">
                     <label for="langHK">Cantonese (粤语)</label>
+                </div>
+            </div>
+        </div>
+        <div class="api-selector">
+            <label>Display Mode:</label>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" id="modeClick" name="displayMode" value="click" checked>
+                    <label for="modeClick">Click to see translation</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="modeShow" name="displayMode" value="show">
+                    <label for="modeShow">Show translation directly</label>
                 </div>
             </div>
         </div>

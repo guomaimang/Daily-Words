@@ -121,6 +121,10 @@ function showCopySuccess() {
 
 // 创建词汇网格HTML
 function createWordGrid(wordList, selectedDate, seed) {
+    // 获取当前显示模式
+    const displayMode = document.querySelector('input[name="displayMode"]:checked')?.value || 'click';
+    const showTranslation = displayMode === 'show';
+    
     const gridHTML = `
         <div class="word-container">
             <div class="info-header">
@@ -130,9 +134,10 @@ function createWordGrid(wordList, selectedDate, seed) {
             </div>
             <div class="word-grid">
                 ${wordList.map((item, index) => `
-                    <div class="word-card" onclick="showTranslation('${escapeHtml(item.word)}', '${escapeHtml(item.translation)}')">
+                    <div class="word-card ${showTranslation ? 'show-translation' : ''}" data-word="${escapeHtmlAttr(item.word)}" data-translation="${escapeHtmlAttr(item.translation)}" data-index="${index}">
                         <div class="word-id">${escapeHtml(item.id)}</div>
                         <div class="word-text">${escapeHtml(item.word)}</div>
+                        ${showTranslation ? `<div class="word-translation">${escapeHtml(item.translation)}</div>` : ''}
                     </div>
                 `).join('')}
             </div>
@@ -147,6 +152,38 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// HTML属性转义函数
+function escapeHtmlAttr(text) {
+    return text.replace(/&/g, '&amp;')
+               .replace(/"/g, '&quot;')
+               .replace(/'/g, '&#39;')
+               .replace(/</g, '&lt;')
+               .replace(/>/g, '&gt;');
+}
+
+// JavaScript字符串转义函数（用于onclick属性）
+function escapeJs(text) {
+    return text.replace(/\\/g, '\\\\')
+               .replace(/'/g, "\\'")
+               .replace(/"/g, '\\"')
+               .replace(/\n/g, '\\n')
+               .replace(/\r/g, '\\r')
+               .replace(/\t/g, '\\t');
+}
+
+// 处理词汇点击事件
+function handleWordClick(word, translation) {
+    const displayMode = document.querySelector('input[name="displayMode"]:checked')?.value || 'click';
+    
+    if (displayMode === 'show') {
+        // 如果已经显示翻译，仍然可以点击打开模态框获取更多操作
+        showTranslation(word, translation);
+    } else {
+        // 点击显示模式，直接显示模态框
+        showTranslation(word, translation);
+    }
 }
 
 // 显示翻译模态框
@@ -225,6 +262,32 @@ function copyCurrentWord() {
     }
 }
 
+// 设置词汇卡片点击事件处理器
+function setupWordCardClickHandlers() {
+    const wordGrid = document.querySelector('.word-grid');
+    if (!wordGrid) return;
+    
+    // 移除之前的事件监听器（如果存在）
+    wordGrid.removeEventListener('click', handleWordGridClick);
+    
+    // 添加事件委托
+    wordGrid.addEventListener('click', handleWordGridClick);
+}
+
+// 处理词汇网格点击事件
+function handleWordGridClick(event) {
+    // 找到被点击的词汇卡片
+    const wordCard = event.target.closest('.word-card');
+    if (!wordCard) return;
+    
+    const word = wordCard.getAttribute('data-word');
+    const translation = wordCard.getAttribute('data-translation');
+    
+    if (word && translation) {
+        handleWordClick(word, translation);
+    }
+}
+
 // 格式化日期为YYYY-MM-DD
 function formatDate(date) {
     const year = date.getFullYear();
@@ -271,6 +334,9 @@ function loadAndDisplayWords(selectedDate) {
             const gridHTML = createWordGrid(randomWords, selectedDate, seed);
             output.innerHTML = gridHTML;
             output.className = '';
+            
+            // 添加事件委托处理词汇卡片点击
+            setupWordCardClickHandlers();
         })
         .catch(error => {
             console.error('Error loading words:', error);
@@ -302,6 +368,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
+    // 监听显示模式变化
+    const displayModeRadios = document.querySelectorAll('input[name="displayMode"]');
+    displayModeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            // 重新加载当前日期的词汇以应用新的显示模式
+            const currentDate = dateInput.value;
+            if (currentDate) {
+                loadAndDisplayWords(currentDate);
+            }
+        });
+    });
+    
     // 模态框事件监听
     closeBtn.addEventListener('click', closeModal);
     
@@ -322,6 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAndDisplayWords(today);
     
     // 将函数添加到全局作用域
+    window.handleWordClick = handleWordClick;
     window.showTranslation = showTranslation;
     window.closeModal = closeModal;
     window.translateOnline = translateOnline;
