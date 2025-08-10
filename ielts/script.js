@@ -161,6 +161,7 @@ function createWordGrid(wordList, selectedDate, seed) {
                         <div class="word-id">${escapeHtml(item.id)}</div>
                         ${showEnglish ? `<div class="word-text">${escapeHtml(item.word)}</div>` : ''}
                         ${showChinese ? `<div class="word-translation">${escapeHtml(item.translation)}</div>` : ''}
+                        <button class="speaker-icon" data-word="${escapeHtmlAttr(item.word)}" title="朗读单词">🔊</button>
                     </div>
                 `).join('')}
             </div>
@@ -278,6 +279,45 @@ function copyCurrentWord() {
     }
 }
 
+// 朗读单词
+function speakWord(word) {
+    if (!word) return;
+    
+    // 检查浏览器是否支持语音合成
+    if (!window.speechSynthesis) {
+        console.warn('当前浏览器不支持语音合成功能');
+        return;
+    }
+    
+    // 停止当前正在播放的语音
+    window.speechSynthesis.cancel();
+    
+    // 创建语音合成对象
+    const utterance = new SpeechSynthesisUtterance(word);
+    
+    // 设置语音参数
+    utterance.lang = 'en-US'; // 英语发音
+    utterance.rate = 0.8; // 语速稍慢一些，便于学习
+    utterance.pitch = 1; // 音调
+    utterance.volume = 1; // 音量
+    
+    // 错误处理
+    utterance.onerror = function(event) {
+        console.error('语音合成出错:', event.error);
+    };
+    
+    // 开始朗读
+    window.speechSynthesis.speak(utterance);
+}
+
+// 朗读当前模态框中的单词
+function speakCurrentWord() {
+    const word = window.currentWord;
+    if (word) {
+        speakWord(word);
+    }
+}
+
 // 设置词汇卡片点击事件处理器
 function setupWordCardClickHandlers() {
     const wordGrid = document.querySelector('.word-grid');
@@ -292,6 +332,16 @@ function setupWordCardClickHandlers() {
 
 // 处理词汇网格点击事件
 function handleWordGridClick(event) {
+    // 检查是否点击了小喇叭按钮
+    if (event.target.classList.contains('speaker-icon')) {
+        event.stopPropagation(); // 阻止事件冒泡
+        const word = event.target.getAttribute('data-word');
+        if (word) {
+            speakWord(word);
+        }
+        return;
+    }
+    
     // 找到被点击的词汇卡片
     const wordCard = event.target.closest('.word-card');
     if (!wordCard) return;
@@ -367,6 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.querySelector('.close');
     const translateOnlineBtn = document.getElementById('translateOnlineBtn');
     const copyWordBtn = document.getElementById('copyWordBtn');
+    const modalSpeakerBtn = document.getElementById('modalSpeakerBtn');
     
     // 设置版权年份
     const currentYear = new Date().getFullYear();
@@ -412,6 +463,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 复制词汇按钮
     copyWordBtn.addEventListener('click', copyCurrentWord);
     
+    // 模态框朗读按钮
+    modalSpeakerBtn.addEventListener('click', speakCurrentWord);
+    
     // 初始加载今天的词汇
     loadAndDisplayWords(today);
     
@@ -421,4 +475,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeModal = closeModal;
     window.translateOnline = translateOnline;
     window.copyCurrentWord = copyCurrentWord;
+    window.speakWord = speakWord;
+    window.speakCurrentWord = speakCurrentWord;
 });
