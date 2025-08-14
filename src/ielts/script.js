@@ -509,6 +509,74 @@ async function trackImageDownload(downloadUrl, accessKey) {
     }
 }
 
+// 下载 Unsplash 图片
+async function downloadUnsplashImage(downloadUrl, photographer, word) {
+    const accessKey = getUnsplashAccessKey();
+    
+    if (!accessKey) {
+        alert('❌ 需要 Unsplash API Key 才能下载图片');
+        return;
+    }
+    
+    try {
+        // 触发下载跟踪（Unsplash API 要求）
+        await trackImageDownload(downloadUrl, accessKey);
+        
+        // 获取实际的图片下载链接
+        const response = await fetch(downloadUrl, {
+            headers: {
+                'Authorization': `Client-ID ${accessKey}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`下载请求失败: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const actualDownloadUrl = data.url;
+        
+        // 创建临时链接进行下载
+        const link = document.createElement('a');
+        link.href = actualDownloadUrl;
+        link.download = `${word}_by_${photographer.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        
+        // 触发下载
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // 显示成功提示
+        showDownloadSuccess(photographer);
+        
+    } catch (error) {
+        console.error('下载图片失败:', error);
+        alert(`❌ 下载失败: ${error.message}`);
+    }
+}
+
+// 显示下载成功提示
+function showDownloadSuccess(photographer) {
+    // 创建临时成功提示
+    const successDiv = document.createElement('div');
+    successDiv.className = 'copy-success show';
+    successDiv.innerHTML = `📥 图片下载成功！感谢 ${photographer}`;
+    successDiv.style.top = '70px'; // 避免与复制提示重叠
+    
+    document.body.appendChild(successDiv);
+    
+    setTimeout(() => {
+        successDiv.classList.remove('show');
+        setTimeout(() => {
+            if (document.body.contains(successDiv)) {
+                document.body.removeChild(successDiv);
+            }
+        }, 200);
+    }, 3000);
+}
+
 // 在模态框中显示图片
 async function loadAndDisplayWordImage(word) {
     const imageContainer = document.getElementById('wordImageContainer');
@@ -528,18 +596,17 @@ async function loadAndDisplayWordImage(word) {
         const imageData = await searchUnsplashImage(word);
         
         if (imageData) {
-            // 跟踪下载（Unsplash API 要求）
-            const accessKey = getUnsplashAccessKey();
-            if (accessKey && imageData.downloadUrl) {
-                trackImageDownload(imageData.downloadUrl, accessKey);
-            }
-            
             // 显示图片
             imageContainer.innerHTML = `
-                <img src="${imageData.url}" 
-                     alt="${imageData.alt}" 
-                     class="modal-image"
-                     loading="lazy">
+                <div class="image-wrapper">
+                    <img src="${imageData.url}" 
+                         alt="${imageData.alt}" 
+                         class="modal-image"
+                         loading="lazy">
+                    <button class="download-btn" 
+                            onclick="downloadUnsplashImage('${imageData.downloadUrl}', '${escapeJs(imageData.photographer)}', '${escapeJs(word)}')"
+                            title="下载图片">📥</button>
+                </div>
                 <div class="image-attribution">
                     📸 Photo by <a href="${imageData.photographerUrl}" target="_blank" rel="noopener">${imageData.photographer}</a> 
                     on <a href="${imageData.photoUrl}" target="_blank" rel="noopener">Unsplash</a>
@@ -721,6 +788,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.speakWord = speakWord;
     window.speakCurrentWord = speakCurrentWord;
     window.loadAndDisplayWordImage = loadAndDisplayWordImage;
+    window.downloadUnsplashImage = downloadUnsplashImage;
     window.saveSettings = saveSettings;
     window.loadSettings = loadSettings;
     window.toggleApiTokenSection = toggleApiTokenSection;
