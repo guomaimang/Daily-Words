@@ -217,6 +217,17 @@ function showTranslation(word, translation) {
     
     modal.style.display = 'block';
     
+    // 如果启用了图片功能，加载相关图片
+    if (isImageFeatureEnabled()) {
+        loadAndDisplayWordImage(word);
+    } else {
+        // 隐藏图片容器
+        const imageContainer = document.getElementById('wordImageContainer');
+        if (imageContainer) {
+            imageContainer.style.display = 'none';
+        }
+    }
+    
     // 添加键盘ESC关闭功能
     document.addEventListener('keydown', handleModalKeydown);
 }
@@ -410,6 +421,208 @@ function loadAndDisplayWords(selectedDate) {
         });
 }
 
+// Unsplash API 配置和函数
+const UNSPLASH_API_BASE = 'https://api.unsplash.com';
+const DEMO_ACCESS_KEY = 'demo'; // 演示模式，有限制
+
+// 获取 Unsplash 访问令牌
+function getUnsplashAccessKey() {
+    const customToken = document.getElementById('unsplashToken')?.value?.trim();
+    return customToken || null; // 如果没有自定义token，返回null
+}
+
+// 检查是否启用了图片功能
+function isImageFeatureEnabled() {
+    const enableImagesCheckbox = document.getElementById('enableImages');
+    return enableImagesCheckbox && enableImagesCheckbox.checked;
+}
+
+// 搜索 Unsplash 图片
+async function searchUnsplashImage(word) {
+    const accessKey = getUnsplashAccessKey();
+    
+    // 如果没有API key且用户启用了图片功能，使用演示模式
+    if (!accessKey) {
+        console.warn('未提供 Unsplash API Key，将使用演示模式（有请求限制）');
+        return null;
+    }
+    
+    try {
+        const searchUrl = `${UNSPLASH_API_BASE}/search/photos`;
+        const params = new URLSearchParams({
+            query: word,
+            per_page: 1,
+            orientation: 'landscape',
+            content_filter: 'high'
+        });
+        
+        const response = await fetch(`${searchUrl}?${params}`, {
+            headers: {
+                'Authorization': `Client-ID ${accessKey}`,
+                'Accept-Version': 'v1'
+            }
+        });
+        
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('API Key 无效，请检查您的 Unsplash Access Key');
+            } else if (response.status === 403) {
+                throw new Error('API 请求限制已达上限，请稍后再试');
+            } else {
+                throw new Error(`API 请求失败: ${response.status} ${response.statusText}`);
+            }
+        }
+        
+        const data = await response.json();
+        
+        if (data.results && data.results.length > 0) {
+            const photo = data.results[0];
+            return {
+                url: photo.urls.small,
+                alt: photo.alt_description || word,
+                photographer: photo.user.name,
+                photographerUrl: photo.user.links.html,
+                photoUrl: photo.links.html,
+                downloadUrl: photo.links.download_location
+            };
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('搜索图片时出错:', error);
+        throw error;
+    }
+}
+
+// 触发图片下载跟踪（Unsplash 要求）
+async function trackImageDownload(downloadUrl, accessKey) {
+    if (!downloadUrl || !accessKey) return;
+    
+    try {
+        await fetch(downloadUrl, {
+            headers: {
+                'Authorization': `Client-ID ${accessKey}`
+            }
+        });
+    } catch (error) {
+        console.warn('图片下载跟踪失败:', error);
+    }
+}
+
+// 在模态框中显示图片
+async function loadAndDisplayWordImage(word) {
+    const imageContainer = document.getElementById('wordImageContainer');
+    
+    if (!isImageFeatureEnabled() || !imageContainer) {
+        if (imageContainer) {
+            imageContainer.style.display = 'none';
+        }
+        return;
+    }
+    
+    // 显示加载状态
+    imageContainer.style.display = 'block';
+    imageContainer.innerHTML = '<div class="image-loading">🔍 正在搜索相关图片...</div>';
+    
+    try {
+        const imageData = await searchUnsplashImage(word);
+        
+        if (imageData) {
+            // 跟踪下载（Unsplash API 要求）
+            const accessKey = getUnsplashAccessKey();
+            if (accessKey && imageData.downloadUrl) {
+                trackImageDownload(imageData.downloadUrl, accessKey);
+            }
+            
+            // 显示图片
+            imageContainer.innerHTML = `
+                <img src="${imageData.url}" 
+                     alt="${imageData.alt}" 
+                     class="modal-image"
+                     loading="lazy">
+                <div class="image-attribution">
+                    📸 Photo by <a href="${imageData.photographerUrl}" target="_blank" rel="noopener">${imageData.photographer}</a> 
+                    on <a href="${imageData.photoUrl}" target="_blank" rel="noopener">Unsplash</a>
+                </div>
+            `;
+        } else {
+            imageContainer.innerHTML = '<div class="image-error">😔 未找到相关图片</div>';
+        }
+    } catch (error) {
+        imageContainer.innerHTML = `<div class="image-error">❌ 加载图片失败: ${error.message}</div>`;
+    }
+}
+
+// 保存设置到本地存储
+function saveSettings() {
+    const settings = {
+        enableImages: document.getElementById('enableImages')?.checked || false,
+        unsplashToken: document.getElementById('unsplashToken')?.value || ''
+    };
+    
+    try {
+        localStorage.setItem('ielts-word-settings', JSON.stringify(settings));
+    } catch (error) {
+        console.warn('保存设置失败:', error);
+    }
+}
+
+// 从本地存储加载设置
+function loadSettings() {
+    try {
+        const saved = localStorage.getItem('ielts-word-settings');
+        if (saved) {
+            const settings = JSON.parse(saved);
+            
+            const enableImagesCheckbox = document.getElementById('enableImages');
+            const unsplashTokenInput = document.getElementById('unsplashToken');
+            
+            if (enableImagesCheckbox && typeof settings.enableImages === 'boolean') {
+                enableImagesCheckbox.checked = settings.enableImages;
+                toggleApiTokenSection(); // 更新UI状态
+            }
+            
+            if (unsplashTokenInput && settings.unsplashToken) {
+                unsplashTokenInput.value = settings.unsplashToken;
+            }
+        }
+    } catch (error) {
+        console.warn('加载设置失败:', error);
+    }
+}
+
+// 切换API Token输入区域的显示/隐藏
+function toggleApiTokenSection() {
+    const enableImagesCheckbox = document.getElementById('enableImages');
+    const apiTokenSection = document.getElementById('apiTokenSection');
+    
+    if (enableImagesCheckbox && apiTokenSection) {
+        if (enableImagesCheckbox.checked) {
+            apiTokenSection.style.display = 'block';
+        } else {
+            apiTokenSection.style.display = 'none';
+        }
+    }
+}
+
+// 切换Token可见性
+function toggleTokenVisibility() {
+    const tokenInput = document.getElementById('unsplashToken');
+    const toggleBtn = document.getElementById('toggleTokenVisibility');
+    
+    if (tokenInput && toggleBtn) {
+        if (tokenInput.type === 'password') {
+            tokenInput.type = 'text';
+            toggleBtn.textContent = '🙈';
+            toggleBtn.title = '隐藏';
+        } else {
+            tokenInput.type = 'password';
+            toggleBtn.textContent = '👁️';
+            toggleBtn.title = '显示';
+        }
+    }
+}
+
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {
     const dateInput = document.getElementById('dateInput');
@@ -466,6 +679,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // 模态框朗读按钮
     modalSpeakerBtn.addEventListener('click', speakCurrentWord);
     
+    // 图片功能相关事件监听器
+    const enableImagesCheckbox = document.getElementById('enableImages');
+    const toggleTokenVisibilityBtn = document.getElementById('toggleTokenVisibility');
+    const unsplashTokenInput = document.getElementById('unsplashToken');
+    
+    // 启用图片功能切换
+    if (enableImagesCheckbox) {
+        enableImagesCheckbox.addEventListener('change', function() {
+            toggleApiTokenSection();
+            saveSettings();
+        });
+    }
+    
+    // Token可见性切换
+    if (toggleTokenVisibilityBtn) {
+        toggleTokenVisibilityBtn.addEventListener('click', toggleTokenVisibility);
+    }
+    
+    // Token输入变化时保存设置
+    if (unsplashTokenInput) {
+        unsplashTokenInput.addEventListener('input', function() {
+            // 延迟保存，避免过于频繁的localStorage写入
+            clearTimeout(window.saveSettingsTimeout);
+            window.saveSettingsTimeout = setTimeout(saveSettings, 500);
+        });
+    }
+    
+    // 加载保存的设置
+    loadSettings();
+    
     // 初始加载今天的词汇
     loadAndDisplayWords(today);
     
@@ -477,4 +720,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.copyCurrentWord = copyCurrentWord;
     window.speakWord = speakWord;
     window.speakCurrentWord = speakCurrentWord;
+    window.loadAndDisplayWordImage = loadAndDisplayWordImage;
+    window.saveSettings = saveSettings;
+    window.loadSettings = loadSettings;
+    window.toggleApiTokenSection = toggleApiTokenSection;
+    window.toggleTokenVisibility = toggleTokenVisibility;
 });

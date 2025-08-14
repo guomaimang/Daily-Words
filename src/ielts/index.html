@@ -444,6 +444,160 @@
             transform: translateX(0);
         }
 
+        /* 图片功能设置样式 */
+        .image-settings {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #d1d9e0;
+        }
+        .image-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: #f6f8fa;
+            border: 1px solid #d1d9e0;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        .toggle-label:hover {
+            background: #ebeef2;
+            border-color: #afb8c1;
+        }
+        .toggle-checkbox {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            cursor: pointer;
+        }
+        .toggle-text {
+            color: #656d76;
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+        .toggle-checkbox:checked + .toggle-text {
+            color: #0969da;
+            font-weight: 600;
+        }
+        .toggle-label:has(.toggle-checkbox:checked) {
+            background: #dbeafe;
+            border-color: #0969da;
+        }
+        .api-token-section {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f6f8fa;
+            border-radius: 8px;
+            border: 1px solid #d1d9e0;
+        }
+        .token-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .token-label {
+            font-weight: 500;
+            color: #1d2329;
+            white-space: nowrap;
+            min-width: 160px;
+        }
+        .token-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #d1d9e0;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1d2329;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+        .token-input:focus {
+            outline: none;
+            border-color: #0969da;
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+        }
+        .toggle-visibility {
+            padding: 8px 12px;
+            border: 1px solid #d1d9e0;
+            border-radius: 6px;
+            background: white;
+            color: #656d76;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .toggle-visibility:hover {
+            background: #f6f8fa;
+            border-color: #afb8c1;
+        }
+        .token-help {
+            margin-top: 8px;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #656d76;
+            line-height: 1.4;
+            margin: 0;
+        }
+        .help-text a {
+            color: #0969da;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .help-text a:hover {
+            text-decoration: underline;
+        }
+        
+        /* 模态框图片样式 */
+        .modal-image-container {
+            margin: 16px 0;
+            text-align: center;
+        }
+        .modal-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: opacity 0.3s ease;
+        }
+        .image-loading {
+            padding: 20px;
+            color: #656d76;
+            font-size: 14px;
+            background: #f6f8fa;
+            border-radius: 8px;
+            border: 1px dashed #d1d9e0;
+        }
+        .image-error {
+            padding: 16px;
+            color: #cf222e;
+            font-size: 13px;
+            background: #fff1f3;
+            border-radius: 6px;
+            border: 1px solid #ffcdd2;
+        }
+        .image-attribution {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #656d76;
+            line-height: 1.3;
+        }
+        .image-attribution a {
+            color: #0969da;
+            text-decoration: none;
+        }
+        .image-attribution a:hover {
+            text-decoration: underline;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 16px;
@@ -587,6 +741,28 @@
                 </div>
             </div>
         </div>
+        
+        <div class="form-section image-settings">
+            <div class="image-toggle">
+                <label class="toggle-label">
+                    <input type="checkbox" id="enableImages" class="toggle-checkbox">
+                    <span class="toggle-text">🖼️ 启用图片助记功能</span>
+                </label>
+            </div>
+            <div class="api-token-section" id="apiTokenSection" style="display: none;">
+                <div class="token-input-group">
+                    <label for="unsplashToken" class="token-label">Unsplash API Access Key:</label>
+                    <input type="password" id="unsplashToken" class="token-input" placeholder="输入你的 Unsplash API Access Key (可选)">
+                    <button type="button" id="toggleTokenVisibility" class="toggle-visibility" title="显示/隐藏">👁️</button>
+                </div>
+                <div class="token-help">
+                    <p class="help-text">
+                        📝 如何获取 API Key：访问 <a href="https://unsplash.com/developers" target="_blank">Unsplash Developer</a> 
+                        注册应用获取 Access Key。
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div id="output" class="loading">Loading IELTS words...</div>
@@ -601,6 +777,9 @@
             </div>
             <div class="modal-body">
                 <div id="chineseTranslation" class="chinese-translation"></div>
+                <div id="wordImageContainer" class="modal-image-container" style="display: none;">
+                    <!-- 图片将在这里动态加载 -->
+                </div>
                 <div class="translation-actions">
                     <button id="translateOnlineBtn" class="btn btn-primary">
                         Translate
