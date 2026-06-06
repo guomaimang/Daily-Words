@@ -290,6 +290,71 @@ function copyCurrentWord() {
     }
 }
 
+// macOS / 部分浏览器自带的「恶搞 / 特殊音效」语音，需要排除，避免选到奇怪的声线
+const NOVELTY_VOICE_NAMES = new Set([
+    'Albert', 'Bad News', 'Bahh', 'Bells', 'Boing', 'Bubbles', 'Cellos',
+    'Deranged', 'Good News', 'Hysterical', 'Jester', 'Junior', 'Kathy',
+    'Organ', 'Pipe Organ', 'Ralph', 'Superstar', 'Trinoids', 'Whisper',
+    'Wobble', 'Zarvox', 'Eddy', 'Flo', 'Fred', 'Grandma', 'Grandpa',
+    'Reed', 'Rocko', 'Sandy', 'Shelley'
+]);
+
+// 优先选用的常见、自然的英文语音（按顺序匹配，命中即停）
+const PREFERRED_VOICE_NAMES = [
+    'Google US English',
+    'Microsoft Aria Online (Natural) - English (United States)',
+    'Microsoft Jenny Online (Natural) - English (United States)',
+    'Microsoft Guy Online (Natural) - English (United States)',
+    'Microsoft Aria',
+    'Microsoft Jenny',
+    'Microsoft Zira',
+    'Microsoft David',
+    'Samantha',
+    'Alex',
+    'Daniel',
+    'Karen',
+    'Moira',
+    'Tessa'
+];
+
+// 选取一个普通自然的英文发音
+function pickPreferredVoice() {
+    if (!window.speechSynthesis) return null;
+    const voices = window.speechSynthesis.getVoices() || [];
+    if (voices.length === 0) return null;
+
+    // 1) 先按名字精确匹配优先列表
+    for (const name of PREFERRED_VOICE_NAMES) {
+        const v = voices.find(v => v.name === name);
+        if (v) return v;
+    }
+
+    // 2) 过滤掉恶搞语音，再挑 en-US / en-GB 的默认或本地语音
+    const englishVoices = voices.filter(v =>
+        /^en(-|_)/i.test(v.lang) && !NOVELTY_VOICE_NAMES.has(v.name)
+    );
+    if (englishVoices.length === 0) return null;
+
+    return (
+        englishVoices.find(v => v.default && /^en-US/i.test(v.lang)) ||
+        englishVoices.find(v => /^en-US/i.test(v.lang) && v.localService) ||
+        englishVoices.find(v => /^en-US/i.test(v.lang)) ||
+        englishVoices.find(v => v.default) ||
+        englishVoices[0]
+    );
+}
+
+// 部分浏览器（Chrome）voices 是异步加载的，提前触发一次以缓存
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    if (typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
+        window.speechSynthesis.addEventListener('voiceschanged', () => {
+            // 触发一次即可，浏览器会缓存
+            window.speechSynthesis.getVoices();
+        });
+    }
+}
+
 // 朗读单词
 function speakWord(word) {
     if (!word) return;
@@ -303,22 +368,46 @@ function speakWord(word) {
     // 停止当前正在播放的语音
     window.speechSynthesis.cancel();
     
-    // 创建语音合成对象
-    const utterance = new SpeechSynthesisUtterance(word);
-    
-    // 设置语音参数
-    utterance.lang = 'en-US'; // 英语发音
-    utterance.rate = 0.8; // 语速稍慢一些，便于学习
-    utterance.pitch = 1; // 音调
-    utterance.volume = 1; // 音量
-    
-    // 错误处理
-    utterance.onerror = function(event) {
-        console.error('语音合成出错:', event.error);
+    const doSpeak = () => {
+        const utterance = new SpeechSynthesisUtterance(word);
+
+        // 显式挑选一个常见、自然的英文语音，避免选到奇怪的恶搞声线
+        const voice = pickPreferredVoice();
+        if (voice) {
+            utterance.voice = voice;
+            utterance.lang = voice.lang || 'en-US';
+        } else {
+            utterance.lang = 'en-US';
+        }
+
+        utterance.rate = 0.9; // 语速稍慢一些，便于学习
+        utterance.pitch = 1;  // 音调
+        utterance.volume = 1; // 音量
+
+        utterance.onerror = function(event) {
+            console.error('语音合成出错:', event.error);
+        };
+
+        window.speechSynthesis.speak(utterance);
     };
-    
-    // 开始朗读
-    window.speechSynthesis.speak(utterance);
+
+    // 如果 voices 还没准备好，等一次 voiceschanged 再发音
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || voices.length === 0) {
+        const onReady = () => {
+            window.speechSynthesis.removeEventListener('voiceschanged', onReady);
+            doSpeak();
+        };
+        window.speechSynthesis.addEventListener('voiceschanged', onReady);
+        // 兜底：300ms 后即使没触发事件也尝试播放
+        setTimeout(() => {
+            window.speechSynthesis.removeEventListener('voiceschanged', onReady);
+            doSpeak();
+        }, 300);
+        return;
+    }
+
+    doSpeak();
 }
 
 // 朗读当前模态框中的单词
