@@ -299,7 +299,7 @@
         /* 聚焦模式样式 */
         .focus-view {
             background: white;
-            padding: 80px 24px 64px 24px;
+            padding: 64px 24px 110px 24px;
             text-align: center;
             position: relative;
             min-height: 60vh;
@@ -321,10 +321,11 @@
         }
         .focus-actions {
             position: absolute;
-            top: 16px;
-            left: 24px;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
-            gap: 8px;
+            gap: 14px;
         }
         .focus-action-btn {
             width: 40px;
@@ -658,12 +659,12 @@
             .focus-arrow.left { left: 8px; }
             .focus-arrow.right { right: 8px; }
             .focus-view {
-                padding: 70px 16px 48px 16px;
+                padding: 56px 16px 96px 16px;
                 min-height: 50vh;
             }
             .focus-actions {
-                left: 12px;
-                top: 12px;
+                bottom: 20px;
+                gap: 10px;
             }
             .focus-counter {
                 right: 12px;

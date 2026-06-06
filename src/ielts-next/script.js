@@ -315,6 +315,10 @@ function handleFocusKeydown(event) {
     } else if (event.key === 'ArrowRight') {
         event.preventDefault();
         focusNext();
+    } else if (event.key === ' ' || event.code === 'Space') {
+        event.preventDefault();
+        const item = currentWords[currentFocusIndex];
+        if (item && item.word) speakWord(item.word);
     }
 }
 
