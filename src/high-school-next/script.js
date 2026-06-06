@@ -104,6 +104,49 @@ function getFocusMode() {
     return document.querySelector('input[name="focusMode"]:checked')?.value || 'off';
 }
 
+// 聚焦进度持久化（仅在同一天内有效，跨天自动失效从第 1 个词开始）
+// key 自动按当前页面所在目录派生，未来新增其它词单（如 toefl-next、gre-next）
+// 直接复用本脚本即可，不会互相覆盖
+function getFocusProgressKey() {
+    let dir = '/';
+    try {
+        const path = (window.location && window.location.pathname) || '';
+        // 去掉末尾的文件名，只保留目录部分
+        dir = path.replace(/[^/]*$/, '') || '/';
+    } catch (e) {
+        dir = '/';
+    }
+    return `daily-words:focusProgress:${dir}`;
+}
+
+function loadFocusProgress(dateString, wordCount) {
+    try {
+        if (!window.localStorage) return 0;
+        const raw = localStorage.getItem(getFocusProgressKey());
+        if (!raw) return 0;
+        const data = JSON.parse(raw);
+        if (!data || data.date !== dateString) return 0;
+        const idx = Number(data.index);
+        if (!Number.isFinite(idx) || idx < 0) return 0;
+        if (wordCount > 0 && idx >= wordCount) return 0;
+        return idx;
+    } catch (e) {
+        return 0;
+    }
+}
+
+function saveFocusProgress(dateString, index) {
+    try {
+        if (!window.localStorage || !dateString) return;
+        localStorage.setItem(
+            getFocusProgressKey(),
+            JSON.stringify({ date: dateString, index: index })
+        );
+    } catch (e) {
+        // 忽略隐私模式 / 容量限制等异常
+    }
+}
+
 // 创建词汇网格 HTML
 function createWordGrid(wordList, selectedDate, seed) {
     const displayMode = getDisplayMode();
@@ -175,6 +218,8 @@ function createFocusView(wordList, selectedDate, seed) {
                 <div class="focus-actions">
                     <button class="focus-action-btn speaker" id="focusSpeakerBtn" title="朗读单词">🔊</button>
                     <button class="focus-action-btn search" id="focusSearchBtn" title="Search on Google">🔍</button>
+                    <button class="focus-action-btn picture" id="focusPictureBtn" title="Search images on Google">🖼️</button>
+                    <button class="focus-action-btn translate" id="focusTranslateBtn" title="查看中文翻译">T</button>
                 </div>
                 <div class="focus-counter" id="focusCounter"></div>
                 <div class="focus-word" id="focusWord"></div>
@@ -200,6 +245,7 @@ function renderFocusWord() {
     if (translationEl) translationEl.textContent = item.translation;
     if (counterEl) counterEl.textContent = `${currentFocusIndex + 1} / ${currentWords.length}  ·  #${item.id}`;
     window.currentWord = item.word;
+    saveFocusProgress(currentSelectedDate, currentFocusIndex);
 }
 
 function focusNext() {
@@ -217,6 +263,8 @@ function focusPrev() {
 function setupFocusHandlers() {
     const speakerBtn = document.getElementById('focusSpeakerBtn');
     const searchBtn = document.getElementById('focusSearchBtn');
+    const pictureBtn = document.getElementById('focusPictureBtn');
+    const translateBtn = document.getElementById('focusTranslateBtn');
     const prevBtn = document.getElementById('focusPrevBtn');
     const nextBtn = document.getElementById('focusNextBtn');
 
@@ -230,6 +278,21 @@ function setupFocusHandlers() {
         searchBtn.addEventListener('click', () => {
             const item = currentWords[currentFocusIndex];
             if (item && item.word) openGoogleMeaning(item.word);
+        });
+    }
+    if (pictureBtn) {
+        pictureBtn.addEventListener('click', () => {
+            const item = currentWords[currentFocusIndex];
+            if (item && item.word) {
+                const url = `https://www.google.com/search?q=${encodeURIComponent(item.word)}&udm=2`;
+                window.open(url, '_blank', 'noopener,noreferrer');
+            }
+        });
+    }
+    if (translateBtn) {
+        translateBtn.addEventListener('click', () => {
+            const item = currentWords[currentFocusIndex];
+            if (item && item.word) showTranslation(item.word, item.translation);
         });
     }
     if (prevBtn) prevBtn.addEventListener('click', focusPrev);
@@ -307,11 +370,11 @@ function closeModal() {
 }
 
 // Google 含义搜索
-// 形如：https://www.google.com/search?q=what+%22apple%22+meaning+in
+// 形如：https://www.google.com/search?q=what+%22apple%22+meaning+in+and+example
 function openGoogleMeaning(word) {
     if (!word) return;
 
-    const query = `what "${word}" meaning in`;
+    const query = `what "${word}" meaning in and example`;
     const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
 }
@@ -521,7 +584,7 @@ function loadAndDisplayWords(selectedDate) {
             currentWords = randomWords;
             currentSelectedDate = selectedDate;
             currentSeed = seed;
-            currentFocusIndex = 0;
+            currentFocusIndex = loadFocusProgress(selectedDate, randomWords.length);
 
             renderCurrentMode();
         })
@@ -572,7 +635,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const focusModeRadios = document.querySelectorAll('input[name="focusMode"]');
     focusModeRadios.forEach(radio => {
         radio.addEventListener('change', () => {
-            currentFocusIndex = 0;
             if (currentWords.length) {
                 renderCurrentMode();
             } else if (dateInput.value) {
