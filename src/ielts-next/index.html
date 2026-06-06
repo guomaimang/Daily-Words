@@ -387,6 +387,10 @@
             word-break: break-word;
             line-height: 1.1;
             letter-spacing: -0.02em;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .focus-translation {
             font-size: clamp(1.25rem, 3vw, 2rem);
@@ -395,6 +399,18 @@
             font-weight: 500;
             line-height: 1.4;
             max-width: 90%;
+        }
+        .focus-view.chinese-only .focus-translation {
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .focus-view.chinese-only .focus-translation {
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .focus-view.english-only .focus-translation {
             display: none;

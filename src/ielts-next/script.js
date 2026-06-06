@@ -260,6 +260,11 @@ function focusPrev() {
     renderFocusWord();
 }
 
+function speakCurrentFocusWord() {
+    const item = currentWords[currentFocusIndex];
+    if (item && item.word) speakWord(item.word);
+}
+
 function setupFocusHandlers() {
     const speakerBtn = document.getElementById('focusSpeakerBtn');
     const searchBtn = document.getElementById('focusSearchBtn');
@@ -267,6 +272,8 @@ function setupFocusHandlers() {
     const translateBtn = document.getElementById('focusTranslateBtn');
     const prevBtn = document.getElementById('focusPrevBtn');
     const nextBtn = document.getElementById('focusNextBtn');
+    const focusWordEl = document.getElementById('focusWord');
+    const focusTranslationEl = document.getElementById('focusTranslation');
 
     if (speakerBtn) {
         speakerBtn.addEventListener('click', () => {
@@ -297,6 +304,14 @@ function setupFocusHandlers() {
     }
     if (prevBtn) prevBtn.addEventListener('click', focusPrev);
     if (nextBtn) nextBtn.addEventListener('click', focusNext);
+
+    // 点击单词（或中文翻译，在仅中文模式下）即朗读，等同于按空格键
+    if (focusWordEl) {
+        focusWordEl.addEventListener('click', speakCurrentFocusWord);
+    }
+    if (focusTranslationEl) {
+        focusTranslationEl.addEventListener('click', speakCurrentFocusWord);
+    }
 }
 
 function handleFocusKeydown(event) {
