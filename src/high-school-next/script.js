@@ -90,9 +90,23 @@ function escapeHtmlAttr(text) {
                        .replace(/>/g, '&gt;');
 }
 
+// 当前展示状态（用于在网格 / 聚焦模式之间切换）
+let currentWords = [];
+let currentFocusIndex = 0;
+let currentSelectedDate = '';
+let currentSeed = 0;
+
+function getDisplayMode() {
+    return document.querySelector('input[name="displayMode"]:checked')?.value || 'english';
+}
+
+function getFocusMode() {
+    return document.querySelector('input[name="focusMode"]:checked')?.value || 'off';
+}
+
 // 创建词汇网格 HTML
 function createWordGrid(wordList, selectedDate, seed) {
-    const displayMode = document.querySelector('input[name="displayMode"]:checked')?.value || 'english';
+    const displayMode = getDisplayMode();
 
     let cardClass = '';
     let showEnglish = true;
@@ -128,10 +142,11 @@ function createWordGrid(wordList, selectedDate, seed) {
             <div class="word-grid">
                 ${wordList.map((item, index) => `
                     <div class="word-card ${cardClass}" data-word="${escapeHtmlAttr(item.word)}" data-translation="${escapeHtmlAttr(item.translation)}" data-index="${index}">
-                        <div class="word-id">${escapeHtml(item.id)}</div>
+                        <button class="speaker-icon" data-word="${escapeHtmlAttr(item.word)}" title="朗读单词">🔊</button>
+                        <button class="search-icon" data-word="${escapeHtmlAttr(item.word)}" title="Search on Google">🔍</button>
                         ${showEnglish ? `<div class="word-text">${escapeHtml(item.word)}</div>` : ''}
                         ${showChinese ? `<div class="word-translation">${escapeHtml(item.translation)}</div>` : ''}
-                        <button class="speaker-icon" data-word="${escapeHtmlAttr(item.word)}" title="朗读单词">🔊</button>
+                        <div class="word-id">${escapeHtml(item.id)}</div>
                     </div>
                 `).join('')}
             </div>
@@ -139,6 +154,123 @@ function createWordGrid(wordList, selectedDate, seed) {
     `;
 
     return gridHTML;
+}
+
+// 创建聚焦视图 HTML（一次只显示一个超大单词）
+function createFocusView(wordList, selectedDate, seed) {
+    const displayMode = getDisplayMode();
+    let viewClass = '';
+    if (displayMode === 'english') viewClass = 'english-only';
+    else if (displayMode === 'chinese') viewClass = 'chinese-only';
+
+    return `
+        <div class="word-container">
+            <div class="info-header">
+                <strong>Date:</strong> ${escapeHtml(selectedDate)} &nbsp;&nbsp;
+                <strong>Seed:</strong> ${seed} &nbsp;&nbsp;
+                <strong>Words:</strong> ${wordList.length} &nbsp;&nbsp;
+                <strong>Mode:</strong> Focus
+            </div>
+            <div class="focus-view ${viewClass}">
+                <div class="focus-actions">
+                    <button class="focus-action-btn speaker" id="focusSpeakerBtn" title="朗读单词">🔊</button>
+                    <button class="focus-action-btn search" id="focusSearchBtn" title="Search on Google">🔍</button>
+                </div>
+                <div class="focus-counter" id="focusCounter"></div>
+                <div class="focus-word" id="focusWord"></div>
+                <div class="focus-translation" id="focusTranslation"></div>
+            </div>
+        </div>
+        <button class="focus-arrow left" id="focusPrevBtn" title="Previous word (←)">‹</button>
+        <button class="focus-arrow right" id="focusNextBtn" title="Next word (→)">›</button>
+    `;
+}
+
+// 渲染聚焦视图当前单词
+function renderFocusWord() {
+    if (!currentWords.length) return;
+    if (currentFocusIndex < 0 || currentFocusIndex >= currentWords.length) {
+        currentFocusIndex = 0;
+    }
+    const item = currentWords[currentFocusIndex];
+    const wordEl = document.getElementById('focusWord');
+    const translationEl = document.getElementById('focusTranslation');
+    const counterEl = document.getElementById('focusCounter');
+    if (wordEl) wordEl.textContent = item.word;
+    if (translationEl) translationEl.textContent = item.translation;
+    if (counterEl) counterEl.textContent = `${currentFocusIndex + 1} / ${currentWords.length}  ·  #${item.id}`;
+    window.currentWord = item.word;
+}
+
+function focusNext() {
+    if (!currentWords.length) return;
+    currentFocusIndex = (currentFocusIndex + 1) % currentWords.length;
+    renderFocusWord();
+}
+
+function focusPrev() {
+    if (!currentWords.length) return;
+    currentFocusIndex = (currentFocusIndex - 1 + currentWords.length) % currentWords.length;
+    renderFocusWord();
+}
+
+function setupFocusHandlers() {
+    const speakerBtn = document.getElementById('focusSpeakerBtn');
+    const searchBtn = document.getElementById('focusSearchBtn');
+    const prevBtn = document.getElementById('focusPrevBtn');
+    const nextBtn = document.getElementById('focusNextBtn');
+
+    if (speakerBtn) {
+        speakerBtn.addEventListener('click', () => {
+            const item = currentWords[currentFocusIndex];
+            if (item && item.word) speakWord(item.word);
+        });
+    }
+    if (searchBtn) {
+        searchBtn.addEventListener('click', () => {
+            const item = currentWords[currentFocusIndex];
+            if (item && item.word) openGoogleMeaning(item.word);
+        });
+    }
+    if (prevBtn) prevBtn.addEventListener('click', focusPrev);
+    if (nextBtn) nextBtn.addEventListener('click', focusNext);
+}
+
+function handleFocusKeydown(event) {
+    if (getFocusMode() !== 'on') return;
+    // 模态框打开时不响应
+    const modal = document.getElementById('translationModal');
+    if (modal && modal.style.display === 'block') return;
+    // 用户在输入框时不响应
+    const target = event.target;
+    const tag = (target && target.tagName ? target.tagName : '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || (target && target.isContentEditable)) return;
+
+    if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        focusPrev();
+    } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        focusNext();
+    }
+}
+
+// 根据当前模式（网格 / 聚焦）渲染输出
+function renderCurrentMode() {
+    const output = document.getElementById('output');
+    if (!output || !currentWords.length) return;
+
+    if (getFocusMode() === 'on') {
+        if (currentFocusIndex >= currentWords.length) currentFocusIndex = 0;
+        output.innerHTML = createFocusView(currentWords, currentSelectedDate, currentSeed);
+        output.className = '';
+        setupFocusHandlers();
+        renderFocusWord();
+    } else {
+        output.innerHTML = createWordGrid(currentWords, currentSelectedDate, currentSeed);
+        output.className = '';
+        setupWordCardClickHandlers();
+    }
 }
 
 // 处理词汇点击
@@ -174,14 +306,18 @@ function closeModal() {
     document.removeEventListener('keydown', handleModalKeydown);
 }
 
-// Google 含义搜索（带图片说明）
-function googleMeaningSearch() {
-    const word = window.currentWord;
+// Google 含义搜索
+// 形如：https://www.google.com/search?q=what+%22apple%22+meaning+in
+function openGoogleMeaning(word) {
     if (!word) return;
 
-    const query = `what does the word "${word}" means? with picture to understand?`;
+    const query = `what "${word}" meaning in`;
     const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+function googleMeaningSearch() {
+    openGoogleMeaning(window.currentWord);
 }
 
 // Google 图片搜索
@@ -316,11 +452,22 @@ function setupWordCardClickHandlers() {
 }
 
 function handleWordGridClick(event) {
-    if (event.target.classList.contains('speaker-icon')) {
+    const speakerBtn = event.target.closest('.speaker-icon');
+    if (speakerBtn) {
         event.stopPropagation();
-        const word = event.target.getAttribute('data-word');
+        const word = speakerBtn.getAttribute('data-word');
         if (word) {
             speakWord(word);
+        }
+        return;
+    }
+
+    const searchBtn = event.target.closest('.search-icon');
+    if (searchBtn) {
+        event.stopPropagation();
+        const word = searchBtn.getAttribute('data-word');
+        if (word) {
+            openGoogleMeaning(word);
         }
         return;
     }
@@ -371,11 +518,12 @@ function loadAndDisplayWords(selectedDate) {
                 return;
             }
 
-            const gridHTML = createWordGrid(randomWords, selectedDate, seed);
-            output.innerHTML = gridHTML;
-            output.className = '';
+            currentWords = randomWords;
+            currentSelectedDate = selectedDate;
+            currentSeed = seed;
+            currentFocusIndex = 0;
 
-            setupWordCardClickHandlers();
+            renderCurrentMode();
         })
         .catch(error => {
             console.error('Error loading words:', error);
@@ -412,12 +560,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const displayModeRadios = document.querySelectorAll('input[name="displayMode"]');
     displayModeRadios.forEach(radio => {
         radio.addEventListener('change', () => {
-            const currentDate = dateInput.value;
-            if (currentDate) {
-                loadAndDisplayWords(currentDate);
+            if (currentWords.length) {
+                renderCurrentMode();
+            } else if (dateInput.value) {
+                loadAndDisplayWords(dateInput.value);
             }
         });
     });
+
+    // 监听聚焦模式变化
+    const focusModeRadios = document.querySelectorAll('input[name="focusMode"]');
+    focusModeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            currentFocusIndex = 0;
+            if (currentWords.length) {
+                renderCurrentMode();
+            } else if (dateInput.value) {
+                loadAndDisplayWords(dateInput.value);
+            }
+        });
+    });
+
+    // 聚焦模式下的方向键导航
+    document.addEventListener('keydown', handleFocusKeydown);
 
     // 模态框事件监听
     closeBtn.addEventListener('click', closeModal);
@@ -445,6 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showTranslation = showTranslation;
     window.closeModal = closeModal;
     window.googleMeaningSearch = googleMeaningSearch;
+    window.openGoogleMeaning = openGoogleMeaning;
     window.googlePictureSearch = googlePictureSearch;
     window.speakWord = speakWord;
     window.speakCurrentWord = speakCurrentWord;
