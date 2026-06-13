@@ -50,28 +50,12 @@ function normalizeEntry(rawEntry) {
         ? v.examples.filter(e => typeof e === 'string' && e.trim())
         : [];
 
-    // 部分音频数据存在异常（例如包含 "undefined" 字符串），统一过滤
-    const cleanUrl = (u) => {
-        if (typeof u !== 'string') return '';
-        if (!/^https?:\/\//i.test(u)) return '';
-        if (/undefined/i.test(u)) return '';
-        return u;
-    };
-
     return {
         id: rawEntry.id != null ? String(rawEntry.id) : '',
         word,
         href: typeof v.href === 'string' ? v.href : '',
         type: typeof v.type === 'string' ? v.type.trim() : '',
         level,
-        us: {
-            mp3: cleanUrl(v.us && v.us.mp3),
-            ogg: cleanUrl(v.us && v.us.ogg)
-        },
-        uk: {
-            mp3: cleanUrl(v.uk && v.uk.mp3),
-            ogg: cleanUrl(v.uk && v.uk.ogg)
-        },
         phonetics: {
             us: (v.phonetics && typeof v.phonetics.us === 'string') ? v.phonetics.us.trim() : '',
             uk: (v.phonetics && typeof v.phonetics.uk === 'string') ? v.phonetics.uk.trim() : ''
@@ -431,13 +415,8 @@ function openYouglish(word) {
     window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-// ---------- 音频播放（优先 mp3 -> ogg -> SpeechSynthesis 兜底） ----------
-let currentAudio = null;
+// ---------- 音频播放（仅使用浏览器内置语音合成 SpeechSynthesis） ----------
 function stopAudio() {
-    if (currentAudio) {
-        try { currentAudio.pause(); } catch (e) { /* ignore */ }
-        currentAudio = null;
-    }
     if (window.speechSynthesis) {
         try { window.speechSynthesis.cancel(); } catch (e) { /* ignore */ }
     }
@@ -447,23 +426,8 @@ function playWordAudio(item, accent) {
     if (!item) return;
     stopAudio();
     accent = accent === 'uk' ? 'uk' : 'us';
-    const src = (item[accent] && item[accent].mp3) || (item[accent] && item[accent].ogg);
-
-    if (src) {
-        const audio = new Audio(src);
-        currentAudio = audio;
-        audio.onerror = () => {
-            // 加载失败 -> TTS 兜底
-            currentAudio = null;
-            speakWord(item.word, accent);
-        };
-        audio.play().catch(() => {
-            currentAudio = null;
-            speakWord(item.word, accent);
-        });
-    } else {
-        speakWord(item.word, accent);
-    }
+    // 不再请求网络上的英式/美式 mp3/ogg 音频，统一使用浏览器（Chrome/Firefox）内置发音
+    speakWord(item.word, accent);
 }
 
 // ---------- TTS 兜底 ----------
