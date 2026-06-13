@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Next - Daily Words</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            background-color: #fafbfc;
+            line-height: 1.5;
+        }
+        .header {
+            background: white;
+            padding: 32px 40px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 32px;
+            position: relative;
+        }
+        .mode-switch {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #0969da;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .mode-switch:hover {
+            background: #0550ae;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.3);
+        }
+        .mode-switch:active {
+            transform: translateY(0);
+        }
+        .header h1 {
+            color: #1d2329;
+            margin: 0 0 12px 0;
+            font-size: 2.25rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .header p {
+            color: #656d76;
+            font-size: 1rem;
+            margin: 0 0 32px 0;
+            text-align: center;
+        }
+
+        .form-section {
+            margin-bottom: 24px;
+        }
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .date-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+        .date-selector label {
+            font-weight: 500;
+            color: #1d2329;
+            white-space: nowrap;
+        }
+        .date-selector input[type="date"] {
+            padding: 8px 12px;
+            border: 1px solid #d1d9e0;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1d2329;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+        .date-selector input[type="date"]:focus {
+            outline: none;
+            border-color: #0969da;
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+        }
+
+        .option-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .option-group .group-label {
+            font-weight: 500;
+            color: #1d2329;
+            white-space: nowrap;
+            min-width: 140px;
+            text-align: right;
+        }
+        .option-group .choices {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .choice-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: #f6f8fa;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .choice-item:hover {
+            background: #ebeef2;
+        }
+        .choice-item input[type="radio"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+        }
+        .choice-item label {
+            font-weight: 400;
+            color: #656d76;
+            font-size: 14px;
+            margin: 0;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .choice-item input[type="radio"]:checked + label {
+            color: #0969da;
+            font-weight: 500;
+        }
+        .choice-item:has(input[type="radio"]:checked) {
+            background: #dbeafe;
+            border-color: #0969da;
+        }
+
+        .word-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .info-header {
+            background: #f6f8fa;
+            border-bottom: 1px solid #d1d9e0;
+            color: #656d76;
+            padding: 16px 24px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            padding: 24px;
+        }
+        .word-card {
+            background: #fafbfc;
+            border: 1px solid #d1d9e0;
+            border-radius: 8px;
+            padding: 48px 48px 32px 48px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .word-card:hover {
+            background: white;
+            border-color: #0969da;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.15);
+        }
+        .word-text {
+            font-size: 1.375rem;
+            font-weight: 500;
+            color: #1d2329;
+            margin: 0 0 8px 0;
+        }
+        .word-translation {
+            font-size: 0.875rem;
+            color: #656d76;
+            line-height: 1.4;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #d1d9e0;
+            display: none;
+        }
+        .word-card.show-translation .word-translation {
+            display: block;
+        }
+        .word-card.show-translation {
+            min-height: 110px;
+        }
+        .word-card.chinese-only .word-text {
+            display: none;
+        }
+        .word-card.chinese-only .word-translation {
+            display: block;
+            border-top: none;
+            margin-top: 0;
+            padding-top: 0;
+            font-size: 1.25rem;
+            color: #1d2329;
+            font-weight: 500;
+        }
+        .word-id {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: #656d76;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .speaker-icon {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 32px;
+            height: 32px;
+            background: #0969da;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .speaker-icon:hover {
+            background: #0550ae;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.4);
+        }
+        .speaker-icon:active {
+            transform: scale(0.95);
+        }
+        .search-icon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            background: #2da44e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            padding: 0;
+        }
+        .search-icon:hover {
+            background: #1f883d;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(45, 164, 78, 0.4);
+        }
+        .search-icon:active {
+            transform: scale(0.95);
+        }
+        .loading {
+            text-align: center;
+            color: #656d76;
+            font-size: 16px;
+            padding: 48px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        /* 聚焦模式样式 */
+        .focus-view {
+            background: white;
+            padding: 64px 24px 110px 24px;
+            text-align: center;
+            position: relative;
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .focus-counter {
+            position: absolute;
+            top: 16px;
+            right: 24px;
+            background: #656d76;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .focus-actions {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 14px;
+        }
+        .focus-action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .focus-action-btn.speaker {
+            background: #0969da;
+        }
+        .focus-action-btn.speaker:hover {
+            background: #0550ae;
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.4);
+        }
+        .focus-action-btn.search {
+            background: #2da44e;
+        }
+        .focus-action-btn.search:hover {
+            background: #1f883d;
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(45, 164, 78, 0.4);
+        }
+        .focus-action-btn.translate {
+            background: white;
+            color: #1d2329;
+            border: 1px solid #d1d9e0;
+            font-weight: 700;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .focus-action-btn.translate:hover {
+            background: #f6f8fa;
+            border-color: #0969da;
+            color: #0969da;
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.2);
+        }
+        .focus-action-btn.picture {
+            background: #8250df;
+        }
+        .focus-action-btn.picture:hover {
+            background: #6639ba;
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(130, 80, 223, 0.4);
+        }
+        .focus-word {
+            font-size: clamp(3rem, 13vw, 9rem);
+            font-weight: 700;
+            color: #1d2329;
+            margin: 0;
+            word-break: break-word;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .focus-translation {
+            font-size: clamp(1.25rem, 3vw, 2rem);
+            color: #656d76;
+            margin-top: 32px;
+            font-weight: 500;
+            line-height: 1.4;
+            max-width: 90%;
+        }
+        .focus-view.chinese-only .focus-translation {
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .focus-view.chinese-only .focus-translation {
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .focus-view.english-only .focus-translation {
+            display: none;
+        }
+        .focus-view.chinese-only .focus-word {
+            display: none;
+        }
+        .focus-view.chinese-only .focus-translation {
+            color: #1d2329;
+            font-size: clamp(2.5rem, 9vw, 6rem);
+            font-weight: 700;
+            margin-top: 0;
+        }
+        .focus-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            background: #0969da;
+            color: white;
+            font-size: 28px;
+            line-height: 1;
+            font-weight: 700;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.35);
+            transition: all 0.2s ease;
+        }
+        .focus-arrow:hover {
+            background: #0550ae;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 16px rgba(9, 105, 218, 0.45);
+        }
+        .focus-arrow:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .focus-arrow.left {
+            left: 24px;
+        }
+        .focus-arrow.right {
+            right: 24px;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(13, 17, 23, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 8% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 16px 70px rgba(13, 17, 23, 0.3);
+            animation: modalSlideIn 0.2s ease;
+        }
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .modal-header {
+            background: #f6f8fa;
+            border-bottom: 1px solid #d1d9e0;
+            color: #1d2329;
+            padding: 20px 24px;
+            border-radius: 12px 12px 0 0;
+            position: relative;
+        }
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1d2329;
+            padding-left: 50px;
+            padding-right: 50px;
+            text-align: center;
+        }
+        .modal-speaker-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            background: #0969da;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .modal-speaker-icon:hover {
+            background: #0550ae;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.4);
+        }
+        .modal-speaker-icon:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .close {
+            color: #656d76;
+            float: right;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .close:hover {
+            background-color: #ebeef2;
+            color: #1d2329;
+        }
+        .modal-body {
+            padding: 24px;
+            text-align: center;
+        }
+        .chinese-translation {
+            font-size: 1.25rem;
+            color: #1d2329;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: #f6f8fa;
+            border-radius: 8px;
+        }
+        .translation-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: #0969da;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0550ae;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.25);
+        }
+        .btn-secondary {
+            background: #1f883d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #186a30;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(31, 136, 61, 0.25);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+            .mode-switch {
+                position: static;
+                margin-bottom: 15px;
+                align-self: flex-start;
+            }
+            .header {
+                padding: 24px 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .header h1 {
+                font-size: 1.875rem;
+            }
+            .option-group {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+            .option-group .group-label {
+                min-width: auto;
+                text-align: center;
+                margin-bottom: 8px;
+            }
+            .option-group .choices {
+                justify-content: center;
+            }
+            .word-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 12px;
+                padding: 16px;
+            }
+            .word-card {
+                padding: 40px 40px 28px 40px;
+            }
+            .word-text {
+                font-size: 1.25rem;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 15% auto;
+            }
+            .translation-actions {
+                gap: 8px;
+            }
+            .btn {
+                flex: 1;
+                max-width: 160px;
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            .focus-arrow {
+                width: 44px;
+                height: 44px;
+                font-size: 22px;
+            }
+            .focus-arrow.left { left: 8px; }
+            .focus-arrow.right { right: 8px; }
+            .focus-view {
+                padding: 56px 16px 96px 16px;
+                min-height: 50vh;
+            }
+            .focus-actions {
+                bottom: 20px;
+                gap: 10px;
+            }
+            .focus-counter {
+                right: 12px;
+                top: 12px;
+            }
+        }
+
+        /* 版权框样式 */
+        .footer {
+            margin-top: 32px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            text-align: center;
+            border-top: 2px solid #0969da;
+        }
+
+        .copyright {
+            font-size: 14px;
+            color: #656d76;
+            font-family: inherit;
+        }
+
+        .copyright a {
+            color: #0969da;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .copyright a:hover {
+            color: #0550ae;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="../ielts/index.html" class="mode-switch">🎓 切换雅思模式</a>
+        <h1>🚀 IELTS Next</h1>
+        <p>Click any word to look it up on Google — see the meaning explained in English with pictures.</p>
+
+        <div class="form-section date-selector">
+            <label for="dateInput">Select Date:</label>
+            <input type="date" id="dateInput">
+        </div>
+
+        <div class="form-section option-group">
+            <span class="group-label">Display Mode:</span>
+            <div class="choices">
+                <div class="choice-item">
+                    <input type="radio" id="modeEnglish" name="displayMode" value="english" checked>
+                    <label for="modeEnglish">English</label>
+                </div>
+                <div class="choice-item">
+                    <input type="radio" id="modeChinese" name="displayMode" value="chinese">
+                    <label for="modeChinese">Chinese</label>
+                </div>
+                <div class="choice-item">
+                    <input type="radio" id="modeBoth" name="displayMode" value="both">
+                    <label for="modeBoth">Both</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section option-group">
+            <span class="group-label">Focus Mode:</span>
+            <div class="choices">
+                <div class="choice-item">
+                    <input type="radio" id="focusOff" name="focusMode" value="off">
+                    <label for="focusOff">Off</label>
+                </div>
+                <div class="choice-item">
+                    <input type="radio" id="focusOn" name="focusMode" value="on" checked>
+                    <label for="focusOn">On</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="output" class="loading">Loading IELTS words...</div>
+
+    <!-- 模态框 -->
+    <div id="translationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-speaker-icon" id="modalSpeakerBtn" title="朗读单词">🔊</button>
+                <h2 id="modalWordTitle"></h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="chineseTranslation" class="chinese-translation"></div>
+                <div class="translation-actions">
+                    <button id="googleSearchBtn" class="btn btn-primary" title="Search the meaning with picture on Google">
+                        🔍 Google
+                    </button>
+                    <button id="googlePictureBtn" class="btn btn-secondary" title="Search images of this word on Google">
+                        🖼️ Picture
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 版权框 -->
+    <div class="footer">
+        <div class="copyright">
+            IELTS Next © <span id="currentYear"></span> <a href="https://guomaimang.github.io/" target="_blank">Hirsun</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
