@@ -259,6 +259,35 @@
         .search-icon:active {
             transform: scale(0.95);
         }
+        .youglish-icon {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            width: 32px;
+            height: 32px;
+            background: #fb8500;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            padding: 0;
+        }
+        .youglish-icon:hover {
+            background: #cc6a00;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(251, 133, 0, 0.4);
+        }
+        .youglish-icon:active {
+            transform: scale(0.95);
+        }
         .loading {
             text-align: center;
             color: #656d76;
@@ -337,6 +366,14 @@
             background: #6639ba;
             transform: scale(1.08);
             box-shadow: 0 4px 12px rgba(130, 80, 223, 0.4);
+        }
+        .focus-action-btn.youglish {
+            background: #fb8500;
+        }
+        .focus-action-btn.youglish:hover {
+            background: #cc6a00;
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(251, 133, 0, 0.4);
         }
         .focus-word {
             font-size: clamp(3rem, 13vw, 9rem);
@@ -529,6 +566,15 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(31, 136, 61, 0.25);
         }
+        .btn-youglish {
+            background: #fb8500;
+            color: white;
+        }
+        .btn-youglish:hover {
+            background: #cc6a00;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(251, 133, 0, 0.25);
+        }
 
         @media (max-width: 768px) {
             body {
@@ -679,6 +725,9 @@
                     </button>
                     <button id="googlePictureBtn" class="btn btn-secondary" title="Search images of this word on Google">
                         🖼️ Picture
+                    </button>
+                    <button id="youglishBtn" class="btn btn-youglish" title="Hear this word in YouTube videos on YouGlish">
+                        🎬 YouGlish
                     </button>
                 </div>
             </div>

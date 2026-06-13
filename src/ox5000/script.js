@@ -185,6 +185,7 @@ function createWordGrid(wordList, selectedDate, seed) {
                 ${renderLevelBadge(item.level)}
                 <button class="speaker-icon" data-index="${index}" title="Read word">🔊</button>
                 <button class="search-icon" data-index="${index}" title="Search on Google">🔍</button>
+                <button class="youglish-icon" data-index="${index}" title="Hear on YouGlish">🎬</button>
                 <div class="word-text">${escapeHtml(item.word)}</div>
                 ${item.type ? `<div class="word-pos">${escapeHtml(item.type)}</div>` : ''}
                 ${phon ? `<div class="word-phonetic">${escapeHtml(phon)}</div>` : ''}
@@ -226,6 +227,7 @@ function createFocusView(wordList, selectedDate, seed) {
                     <button class="focus-action-btn info" id="focusInfoBtn" title="Show details">ⓘ</button>
                     <button class="focus-action-btn search" id="focusSearchBtn" title="Search on Google">🔍</button>
                     <button class="focus-action-btn picture" id="focusPictureBtn" title="Search images on Google">🖼️</button>
+                    <button class="focus-action-btn youglish" id="focusYouglishBtn" title="Hear on YouGlish">🎬</button>
                 </div>
             </div>
         </div>
@@ -281,6 +283,7 @@ function setupFocusHandlers() {
     const infoBtn = document.getElementById('focusInfoBtn');
     const searchBtn = document.getElementById('focusSearchBtn');
     const pictureBtn = document.getElementById('focusPictureBtn');
+    const youglishBtn = document.getElementById('focusYouglishBtn');
     const prevBtn = document.getElementById('focusPrevBtn');
     const nextBtn = document.getElementById('focusNextBtn');
     const focusWordEl = document.getElementById('focusWord');
@@ -295,6 +298,10 @@ function setupFocusHandlers() {
     if (pictureBtn) pictureBtn.addEventListener('click', () => {
         const item = currentWords[currentFocusIndex];
         if (item) openGooglePicture(item.word);
+    });
+    if (youglishBtn) youglishBtn.addEventListener('click', () => {
+        const item = currentWords[currentFocusIndex];
+        if (item) openYouglish(item.word);
     });
     if (prevBtn) prevBtn.addEventListener('click', focusPrev);
     if (nextBtn) nextBtn.addEventListener('click', focusNext);
@@ -412,6 +419,15 @@ function openGoogleMeaning(word) {
 function openGooglePicture(word) {
     if (!word) return;
     const url = `https://www.google.com/search?q=${encodeURIComponent(word)}&udm=2`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+// YouGlish：通过 YouTube 视频示例发音
+// 形如：https://youglish.com/pronounce/get_out/english
+function openYouglish(word) {
+    if (!word) return;
+    const slug = String(word).trim().toLowerCase().replace(/\s+/g, '_');
+    const url = `https://youglish.com/pronounce/${encodeURIComponent(slug)}/english`;
     window.open(url, '_blank', 'noopener,noreferrer');
 }
 
@@ -569,6 +585,14 @@ function handleWordGridClick(event) {
         if (item) openGoogleMeaning(item.word);
         return;
     }
+    const youglishBtn = event.target.closest('.youglish-icon');
+    if (youglishBtn) {
+        event.stopPropagation();
+        const idx = Number(youglishBtn.getAttribute('data-index'));
+        const item = currentWords[idx];
+        if (item) openYouglish(item.word);
+        return;
+    }
     const card = event.target.closest('.word-card');
     if (!card) return;
     const idx = Number(card.getAttribute('data-index'));
@@ -619,6 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.querySelector('.close');
     const googleSearchBtn = document.getElementById('googleSearchBtn');
     const googlePictureBtn = document.getElementById('googlePictureBtn');
+    const youglishBtn = document.getElementById('youglishBtn');
     const modalPronUsBtn = document.getElementById('modalPronUsBtn');
     const modalPronUkBtn = document.getElementById('modalPronUkBtn');
 
@@ -661,6 +686,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = window.currentItem;
         if (item) openGooglePicture(item.word);
     });
+    if (youglishBtn) youglishBtn.addEventListener('click', () => {
+        const item = window.currentItem;
+        if (item) openYouglish(item.word);
+    });
     modalPronUsBtn.addEventListener('click', () => {
         const item = window.currentItem;
         if (item) playWordAudio(item, 'us');
@@ -676,4 +705,5 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showWordModal = showWordModal;
     window.closeModal = closeModal;
     window.playWordAudio = playWordAudio;
+    window.openYouglish = openYouglish;
 });

@@ -149,6 +149,7 @@ function createWordGrid(wordList, selectedDate, seed) {
                     <div class="word-card" data-word="${escapeHtmlAttr(item.word)}" data-index="${index}">
                         <button class="speaker-icon" data-word="${escapeHtmlAttr(item.word)}" title="Read word">🔊</button>
                         <button class="search-icon" data-word="${escapeHtmlAttr(item.word)}" title="Search on Google">🔍</button>
+                        <button class="youglish-icon" data-word="${escapeHtmlAttr(item.word)}" title="Hear on YouGlish">🎬</button>
                         <div class="word-text">${escapeHtml(item.word)}</div>
                         <div class="word-id">${escapeHtml(item.id)}</div>
                     </div>
@@ -175,6 +176,7 @@ function createFocusView(wordList, selectedDate, seed) {
                     <button class="focus-action-btn speaker" id="focusSpeakerBtn" title="Read word">🔊</button>
                     <button class="focus-action-btn search" id="focusSearchBtn" title="Search on Google">🔍</button>
                     <button class="focus-action-btn picture" id="focusPictureBtn" title="Search images on Google">🖼️</button>
+                    <button class="focus-action-btn youglish" id="focusYouglishBtn" title="Hear on YouGlish">🎬</button>
                 </div>
                 <div class="focus-counter" id="focusCounter"></div>
                 <div class="focus-word" id="focusWord"></div>
@@ -221,6 +223,7 @@ function setupFocusHandlers() {
     const speakerBtn = document.getElementById('focusSpeakerBtn');
     const searchBtn = document.getElementById('focusSearchBtn');
     const pictureBtn = document.getElementById('focusPictureBtn');
+    const youglishBtn = document.getElementById('focusYouglishBtn');
     const prevBtn = document.getElementById('focusPrevBtn');
     const nextBtn = document.getElementById('focusNextBtn');
     const focusWordEl = document.getElementById('focusWord');
@@ -244,6 +247,12 @@ function setupFocusHandlers() {
                 const url = `https://www.google.com/search?q=${encodeURIComponent(item.word)}&udm=2`;
                 window.open(url, '_blank', 'noopener,noreferrer');
             }
+        });
+    }
+    if (youglishBtn) {
+        youglishBtn.addEventListener('click', () => {
+            const item = currentWords[currentFocusIndex];
+            if (item && item.word) openYouglish(item.word);
         });
     }
     if (prevBtn) prevBtn.addEventListener('click', focusPrev);
@@ -349,6 +358,20 @@ function googlePictureSearch() {
 
     const url = `https://www.google.com/search?q=${encodeURIComponent(word)}&udm=2`;
     window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+// YouGlish：通过 YouTube 视频示例发音
+// 形如：https://youglish.com/pronounce/get_out/english
+function openYouglish(word) {
+    if (!word) return;
+    // 多词短语用下划线连接，与 YouGlish 的 URL 风格一致（如 get_out）
+    const slug = String(word).trim().toLowerCase().replace(/\s+/g, '_');
+    const url = `https://youglish.com/pronounce/${encodeURIComponent(slug)}/english`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+function youglishSearch() {
+    openYouglish(window.currentWord);
 }
 
 // 语音相关
@@ -494,6 +517,16 @@ function handleWordGridClick(event) {
         return;
     }
 
+    const youglishBtn = event.target.closest('.youglish-icon');
+    if (youglishBtn) {
+        event.stopPropagation();
+        const word = youglishBtn.getAttribute('data-word');
+        if (word) {
+            openYouglish(word);
+        }
+        return;
+    }
+
     const wordCard = event.target.closest('.word-card');
     if (!wordCard) return;
 
@@ -559,6 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.querySelector('.close');
     const googleSearchBtn = document.getElementById('googleSearchBtn');
     const googlePictureBtn = document.getElementById('googlePictureBtn');
+    const youglishBtn = document.getElementById('youglishBtn');
     const modalSpeakerBtn = document.getElementById('modalSpeakerBtn');
 
     // 设置版权年份
@@ -607,6 +641,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Google 图片按钮：在新页面打开
     googlePictureBtn.addEventListener('click', googlePictureSearch);
 
+    // YouGlish 按钮：在新页面打开
+    if (youglishBtn) youglishBtn.addEventListener('click', youglishSearch);
+
     // 模态框朗读按钮
     modalSpeakerBtn.addEventListener('click', speakCurrentWord);
 
@@ -620,6 +657,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.googleMeaningSearch = googleMeaningSearch;
     window.openGoogleMeaning = openGoogleMeaning;
     window.googlePictureSearch = googlePictureSearch;
+    window.openYouglish = openYouglish;
+    window.youglishSearch = youglishSearch;
     window.speakWord = speakWord;
     window.speakCurrentWord = speakCurrentWord;
 });
