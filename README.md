@@ -16,7 +16,7 @@
 
 ### 在线访问
 
-直接访问部署的网站即可使用。
+访问 [word.hirsun.hk](https://word.hirsun.hk/) 即可使用。
 
 ### 本地运行
 
