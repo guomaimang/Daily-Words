@@ -13,6 +13,133 @@
             background-color: #f5f5f5;
             line-height: 1.6;
         }
+        .mode-hub {
+            margin-bottom: 20px;
+            padding: 28px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #0b57d0 0%, #3378db 52%, #6b5ce7 100%);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(11, 87, 208, 0.2);
+            color: white;
+        }
+        .mode-hub::after {
+            content: '';
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            top: -150px;
+            right: -80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            pointer-events: none;
+        }
+        .mode-hub__eyebrow {
+            margin: 0 0 5px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            opacity: 0.82;
+        }
+        .mode-hub h1 {
+            margin: 0;
+            font-size: 30px;
+            line-height: 1.25;
+        }
+        .mode-hub__intro {
+            max-width: 620px;
+            margin: 8px 0 22px;
+            color: rgba(255,255,255,0.85);
+            font-size: 15px;
+        }
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .mode-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.12);
+            color: white;
+            text-decoration: none;
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+            backdrop-filter: blur(5px);
+        }
+        .mode-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        .mode-card:focus-visible {
+            outline: 3px solid white;
+            outline-offset: 2px;
+        }
+        .mode-card--current {
+            background: white;
+            color: #164b94;
+            border-color: white;
+        }
+        .mode-card--current:hover {
+            background: white;
+        }
+        .mode-card__icon {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            place-items: center;
+            border-radius: 11px;
+            background: rgba(255,255,255,0.16);
+            font-size: 22px;
+        }
+        .mode-card--current .mode-card__icon {
+            background: #e8f0fe;
+        }
+        .mode-card__content {
+            min-width: 0;
+            flex: 1;
+        }
+        .mode-card__title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .mode-card__desc {
+            display: block;
+            overflow: hidden;
+            color: rgba(255,255,255,0.72);
+            font-size: 13px;
+            line-height: 1.4;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .mode-card--current .mode-card__desc {
+            color: #66758a;
+        }
+        .mode-card__badge {
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: #dbeafe;
+            color: #0b57d0;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .mode-card__arrow {
+            flex: 0 0 auto;
+            font-size: 18px;
+            opacity: 0.65;
+        }
         .header {
             text-align: center;
             margin-bottom: 20px;
@@ -116,7 +243,8 @@
             flex-wrap: wrap;
         }
         
-        .header h1 {
+        .header h1,
+        .header h2 {
             margin: 10px 0 15px 0;
             font-size: 28px;
         }
@@ -248,6 +376,25 @@
             body {
                 padding: 8px;
             }
+            .mode-hub {
+                margin-bottom: 15px;
+                padding: 20px 14px;
+                border-radius: 12px;
+            }
+            .mode-hub h1 {
+                font-size: 25px;
+            }
+            .mode-hub__intro {
+                margin-bottom: 16px;
+                font-size: 14px;
+            }
+            .mode-grid {
+                grid-template-columns: 1fr;
+                gap: 9px;
+            }
+            .mode-card {
+                padding: 12px;
+            }
             .mode-switch {
                 position: static;
                 margin-bottom: 10px;
@@ -262,7 +409,8 @@
                 align-items: center;
                 margin-bottom: 15px;
             }
-            .header h1 {
+            .header h1,
+            .header h2 {
                 margin: 8px 0 10px 0;
                 font-size: 24px;
             }
@@ -355,9 +503,72 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <a href="ielts/index.html" class="mode-switch">🎓 切换雅思模式</a>
-        <h1>每日词汇</h1>
+    <nav class="mode-hub" aria-labelledby="modeHubTitle">
+        <p class="mode-hub__eyebrow">DAILY WORDS</p>
+        <h1 id="modeHubTitle">今天想学什么？</h1>
+        <p class="mode-hub__intro">选择适合你的词库和学习方式，直接开始今天的 100 个单词。</p>
+        <div class="mode-grid">
+            <a href="#daily-words" class="mode-card mode-card--current" aria-current="page">
+                <span class="mode-card__icon" aria-hidden="true">🀄</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">每日中文词汇 <span class="mode-card__badge">当前</span></span>
+                    <span class="mode-card__desc">中文词汇 · 英语 / 粤语翻译</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">↓</span>
+            </a>
+            <a href="high-school/index.html" class="mode-card">
+                <span class="mode-card__icon" aria-hidden="true">🎒</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">高中词汇</span>
+                    <span class="mode-card__desc">高中英语 · 中文释义与图片</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">›</span>
+            </a>
+            <a href="high-school-next/index.html" class="mode-card">
+                <span class="mode-card__icon" aria-hidden="true">🚀</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">High School Next</span>
+                    <span class="mode-card__desc">全英查词 · 图片辅助理解</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">›</span>
+            </a>
+            <a href="ielts/index.html" class="mode-card">
+                <span class="mode-card__icon" aria-hidden="true">🎓</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">IELTS 词汇</span>
+                    <span class="mode-card__desc">雅思词库 · 中文释义与图片</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">›</span>
+            </a>
+            <a href="ielts-next/index.html" class="mode-card">
+                <span class="mode-card__icon" aria-hidden="true">⚡</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">IELTS Next</span>
+                    <span class="mode-card__desc">雅思词汇 · 英语沉浸式查词</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">›</span>
+            </a>
+            <a href="ox3000/index.html" class="mode-card">
+                <span class="mode-card__icon" aria-hidden="true">📘</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">Oxford 3000</span>
+                    <span class="mode-card__desc">牛津核心词汇 · 适合打基础</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">›</span>
+            </a>
+            <a href="ox5000/index.html" class="mode-card">
+                <span class="mode-card__icon" aria-hidden="true">📚</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">Oxford 5000</span>
+                    <span class="mode-card__desc">进阶词库 · 音标、发音与例句</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">›</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="header" id="daily-words">
+        <h2>每日中文词汇</h2>
         <div class="date-selector">
             <label for="dateInput">选择日期：</label>
             <input type="date" id="dateInput">
