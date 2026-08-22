@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日词汇</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .mode-hub {
+            margin-bottom: 20px;
+            padding: 28px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #0b57d0 0%, #3378db 52%, #6b5ce7 100%);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(11, 87, 208, 0.2);
+            color: white;
+        }
+        .mode-hub::after {
+            content: '';
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            top: -150px;
+            right: -80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            pointer-events: none;
+        }
+        .mode-hub__eyebrow {
+            margin: 0 0 5px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            opacity: 0.82;
+        }
+        .mode-hub h1 {
+            margin: 0;
+            font-size: 30px;
+            line-height: 1.25;
+        }
+        .mode-hub__intro {
+            max-width: 620px;
+            margin: 8px 0 22px;
+            color: rgba(255,255,255,0.85);
+            font-size: 15px;
+        }
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .mode-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.12);
+            color: white;
+            text-decoration: none;
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+            backdrop-filter: blur(5px);
+        }
+        .mode-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        .mode-card:focus-visible {
+            outline: 3px solid white;
+            outline-offset: 2px;
+        }
+        .mode-card--current {
+            background: white;
+            color: #164b94;
+            border-color: white;
+        }
+        .mode-card--current:hover {
+            background: white;
+        }
+        .mode-card__icon {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            place-items: center;
+            border-radius: 11px;
+            background: rgba(255,255,255,0.16);
+            font-size: 22px;
+        }
+        .mode-card--current .mode-card__icon {
+            background: #e8f0fe;
+        }
+        .mode-card__content {
+            min-width: 0;
+            flex: 1;
+        }
+        .mode-card__title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .mode-card__desc {
+            display: block;
+            overflow: hidden;
+            color: rgba(255,255,255,0.72);
+            font-size: 13px;
+            line-height: 1.4;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .mode-card--current .mode-card__desc {
+            color: #66758a;
+        }
+        .mode-card__badge {
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: #dbeafe;
+            color: #0b57d0;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .mode-card__arrow {
+            flex: 0 0 auto;
+            font-size: 18px;
+            opacity: 0.65;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .mode-switch {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #007bff;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .mode-switch:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+        .mode-switch:active {
+            transform: translateY(0);
+        }
+        .date-selector {
+            margin: 15px 0 10px 0;
+        }
+        .date-selector label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .date-selector input[type="date"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .language-selector {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .language-selector label {
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .radio-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .radio-item input[type="radio"] {
+            margin: 0;
+            transform: scale(1.2);
+        }
+        .radio-item label {
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+            margin: 0;
+            cursor: pointer;
+        }
+        .api-selector {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .api-selector label {
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .header h1,
+        .header h2 {
+            margin: 10px 0 15px 0;
+            font-size: 28px;
+        }
+
+        .word-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .info-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 14px;
+            color: #666;
+        }
+        .word-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .word-table thead {
+            background: #e9ecef;
+            font-weight: bold;
+        }
+        .word-table th,
+        .word-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .word-table th {
+            font-weight: 600;
+            color: #495057;
+            position: sticky;
+            top: 0;
+            background: #e9ecef;
+            z-index: 10;
+        }
+        .word-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .word-table tbody tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+        .word-table tbody tr:nth-child(even):hover {
+            background-color: #f8f9fa;
+        }
+        .word-column {
+            font-weight: 600;
+            color: #212529;
+            min-width: 120px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .word-column:hover {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        .pinyin-column {
+            color: #6c757d;
+            font-family: 'Consolas', 'Monaco', monospace;
+            min-width: 140px;
+        }
+        .frequency-column {
+            color: #868e96;
+            text-align: right;
+            cursor: pointer;
+            min-width: 80px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .frequency-column:hover {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            font-weight: bold;
+        }
+        .frequency-column:active {
+            background-color: #bbdefb;
+        }
+        .copy-tooltip {
+            position: absolute;
+            top: 50%;
+            right: 5px;
+            transform: translateY(-50%);
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+        }
+        .frequency-column:hover .copy-tooltip {
+            opacity: 1;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+            padding: 40px;
+        }
+        .table-container {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .copy-success {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        .copy-success.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 8px;
+            }
+            .mode-hub {
+                margin-bottom: 15px;
+                padding: 20px 14px;
+                border-radius: 12px;
+            }
+            .mode-hub h1 {
+                font-size: 25px;
+            }
+            .mode-hub__intro {
+                margin-bottom: 16px;
+                font-size: 14px;
+            }
+            .mode-grid {
+                grid-template-columns: 1fr;
+                gap: 9px;
+            }
+            .mode-card {
+                padding: 12px;
+            }
+            .mode-switch {
+                position: static;
+                margin-bottom: 10px;
+                align-self: flex-start;
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+            .header {
+                padding: 12px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+            .header h1,
+            .header h2 {
+                margin: 8px 0 10px 0;
+                font-size: 24px;
+            }
+            .date-selector {
+                margin: 8px 0;
+            }
+            .controls-row {
+                flex-direction: column;
+                gap: 12px;
+                margin: 8px 0;
+            }
+            .language-selector, .api-selector {
+                flex-direction: column;
+                gap: 8px;
+                margin: 0;
+            }
+            .language-selector label, .api-selector label {
+                margin-right: 0;
+                margin-bottom: 3px;
+                font-size: 13px;
+            }
+            .radio-group {
+                justify-content: center;
+                gap: 10px;
+            }
+            .radio-item label {
+                font-size: 13px;
+            }
+            .header p {
+                margin: 8px 0 3px 0 !important;
+                font-size: 13px !important;
+                padding: 0 5px;
+                text-align: center;
+            }
+            .word-table th,
+            .word-table td {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            .word-column {
+                min-width: 70px;
+            }
+            .pinyin-column {
+                min-width: 90px;
+            }
+            .frequency-column {
+                min-width: 50px;
+            }
+        }
+        
+        /* 版权框样式 */
+        .footer {
+            margin-top: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 2px solid #e9ecef;
+        }
+        
+        .copyright {
+            font-size: 14px;
+            color: #666;
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+        }
+        
+        .copyright a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .copyright a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .footer {
+                margin-top: 15px;
+                padding: 12px;
+            }
+            
+            .copyright {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="mode-hub" aria-labelledby="modeHubTitle">
+        <p class="mode-hub__eyebrow">DAILY WORDS</p>
+        <h1 id="modeHubTitle">今天想学什么？</h1>
+        <p class="mode-hub__intro">选择适合你的词库和学习方式，直接开始今天的 100 个单词。</p>
+        <div class="mode-grid">
+            <a href="#daily-words" class="mode-card mode-card--current" aria-current="page">
+                <span class="mode-card__icon" aria-hidden="true">🀄</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">每日中文词汇 <span class="mode-card__badge">当前</span></span>
+                    <span class="mode-card__desc">中文词汇 · 英语 / 粤语翻译</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">↓</span>
+            </a>
+            <a href="high-school/index.html" class="mode-card">
+                <span class="mode-card__icon" aria-hidden="true">🎒</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">高中词汇</span>
+                    <span class="mode-card__desc">高中英语 · 中文释义与图片</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">›</span>
+            </a>
+            <a href="ielts/index.html" class="mode-card">
+                <span class="mode-card__icon" aria-hidden="true">🎓</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">IELTS 词汇</span>
+                    <span class="mode-card__desc">雅思词库 · 中文释义与图片</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">›</span>
+            </a>
+            <a href="ox3000/index.html" class="mode-card">
+                <span class="mode-card__icon" aria-hidden="true">📘</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">Oxford 3000</span>
+                    <span class="mode-card__desc">牛津核心词汇 · 适合打基础</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">›</span>
+            </a>
+            <a href="ox5000/index.html" class="mode-card">
+                <span class="mode-card__icon" aria-hidden="true">📚</span>
+                <span class="mode-card__content">
+                    <span class="mode-card__title">Oxford 5000</span>
+                    <span class="mode-card__desc">进阶词库 · 音标、发音与例句</span>
+                </span>
+                <span class="mode-card__arrow" aria-hidden="true">›</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="header" id="daily-words">
+        <h2>每日中文词汇</h2>
+        <div class="date-selector">
+            <label for="dateInput">选择日期：</label>
+            <input type="date" id="dateInput">
+        </div>
+        <div class="controls-row">
+            <div class="api-selector">
+                <label>翻译 API：</label>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="apiGoogle" name="apiChoice" value="google" checked>
+                        <label for="apiGoogle">Google</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="apiBing" name="apiChoice" value="bing">
+                        <label for="apiBing">Bing</label>
+                    </div>
+                    <div class="radio-item" id="apiShyypOption" style="display: block;">
+                        <input type="radio" id="apiShyyp" name="apiChoice" value="shyyp">
+                        <label for="apiShyyp">Shyyp</label>
+                    </div>
+                </div>
+            </div>
+            <div class="language-selector">
+                <label>翻译语言：</label>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="langHK" name="language" value="hk" checked>
+                        <label for="langHK">粤语 (HK)</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="langEN" name="language" value="en">
+                        <label for="langEN">英语 (EN)</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p style="margin: 10px 0 5px 0; font-size: 14px; color: #666;">选择特定日期，每天都会显示相同的100个词汇。点击词汇可使用所选API翻译。</p>
+    </div>
+    
+    <div id="output" class="loading">正在加载词汇...</div>
+    
+    <div id="copySuccess" class="copy-success">
+        词汇已复制到剪贴板！
+    </div>
+
+    <!-- 版权框 -->
+    <div class="footer">
+        <div class="copyright">
+            Daily Words © <span id="currentYear"></span> <a href="https://guomaimang.github.io/" target="_blank">Hirsun</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oxford 5000 - Daily Words</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            background-color: #fafbfc;
+            line-height: 1.5;
+        }
+        .header {
+            background: white;
+            padding: 32px 40px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 32px;
+            position: relative;
+        }
+        .mode-switch {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #0969da;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .mode-switch:hover {
+            background: #0550ae;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.3);
+        }
+        .mode-switch:active { transform: translateY(0); }
+        .header h1 {
+            color: #1d2329;
+            margin: 0 0 12px 0;
+            font-size: 2.25rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .header p {
+            color: #656d76;
+            font-size: 1rem;
+            margin: 0 0 32px 0;
+            text-align: center;
+        }
+
+        .form-section { margin-bottom: 24px; }
+        .form-section:last-child { margin-bottom: 0; }
+
+        .date-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+        .date-selector label {
+            font-weight: 500;
+            color: #1d2329;
+            white-space: nowrap;
+        }
+        .date-selector input[type="date"] {
+            padding: 8px 12px;
+            border: 1px solid #d1d9e0;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1d2329;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+        .date-selector input[type="date"]:focus {
+            outline: none;
+            border-color: #0969da;
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+        }
+
+        .option-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .option-group .group-label {
+            font-weight: 500;
+            color: #1d2329;
+            white-space: nowrap;
+            min-width: 140px;
+            text-align: right;
+        }
+        .option-group .choices {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .choice-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: #f6f8fa;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .choice-item:hover { background: #ebeef2; }
+        .choice-item input[type="radio"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+        }
+        .choice-item label {
+            font-weight: 400;
+            color: #656d76;
+            font-size: 14px;
+            margin: 0;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .choice-item input[type="radio"]:checked + label {
+            color: #0969da;
+            font-weight: 500;
+        }
+        .choice-item:has(input[type="radio"]:checked) {
+            background: #dbeafe;
+            border-color: #0969da;
+        }
+
+        .word-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .info-header {
+            background: #f6f8fa;
+            border-bottom: 1px solid #d1d9e0;
+            color: #656d76;
+            padding: 16px 24px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            padding: 24px;
+        }
+        .word-card {
+            background: #fafbfc;
+            border: 1px solid #d1d9e0;
+            border-radius: 8px;
+            padding: 56px 16px 36px 16px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .word-card:hover {
+            background: white;
+            border-color: #0969da;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.15);
+        }
+        .word-text {
+            font-size: 1.375rem;
+            font-weight: 500;
+            color: #1d2329;
+            margin: 0 0 4px 0;
+            word-break: break-word;
+        }
+        .word-pos {
+            font-size: 0.8rem;
+            color: #656d76;
+            font-style: italic;
+            margin-top: 2px;
+        }
+        .word-phonetic {
+            font-size: 0.8rem;
+            color: #57606a;
+            margin-top: 4px;
+            font-family: 'Lucida Sans Unicode', 'Lucida Grande', 'Arial Unicode MS', sans-serif;
+        }
+        .word-id {
+            position: absolute;
+            bottom: 6px;
+            right: 8px;
+            background: #656d76;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .speaker-icon {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 32px;
+            height: 32px;
+            background: #0969da;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .speaker-icon:hover {
+            background: #0550ae;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.4);
+        }
+        .speaker-icon:active { transform: scale(0.95); }
+        .search-icon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            background: #2da44e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            padding: 0;
+        }
+        .search-icon:hover {
+            background: #1f883d;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(45, 164, 78, 0.4);
+        }
+        .search-icon:active { transform: scale(0.95); }
+        .youglish-icon {
+            position: absolute;
+            bottom: 6px;
+            left: 8px;
+            width: 28px;
+            height: 28px;
+            background: #fb8500;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            padding: 0;
+        }
+        .youglish-icon:hover {
+            background: #cc6a00;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(251, 133, 0, 0.4);
+        }
+        .youglish-icon:active { transform: scale(0.95); }
+
+        /* CEFR 等级徽章 */
+        .level-badge {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            color: white;
+            line-height: 1.4;
+            background: #8b949e;
+        }
+        .level-badge.level-A1 { background: #1f883d; }
+        .level-badge.level-A2 { background: #2da44e; }
+        .level-badge.level-B1 { background: #bf8700; }
+        .level-badge.level-B2 { background: #d1242f; }
+        .level-badge.level-C1 { background: #6639ba; }
+        .level-badge.level-C2 { background: #1d2329; }
+
+        .loading {
+            text-align: center;
+            color: #656d76;
+            font-size: 16px;
+            padding: 48px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        /* 聚焦模式样式 */
+        .focus-view {
+            background: white;
+            padding: 64px 24px 110px 24px;
+            text-align: center;
+            position: relative;
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .focus-counter {
+            position: absolute;
+            top: 16px;
+            right: 24px;
+            background: #656d76;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .focus-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .focus-meta .level-badge {
+            position: static;
+            transform: none;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        .focus-meta .pos {
+            font-style: italic;
+            color: #57606a;
+            font-size: 1rem;
+        }
+        .focus-actions {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .focus-action-btn {
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .focus-action-btn.us { background: #0969da; }
+        .focus-action-btn.us:hover {
+            background: #0550ae;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.4);
+        }
+        .focus-action-btn.uk { background: #cf222e; }
+        .focus-action-btn.uk:hover {
+            background: #a40e26;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(207, 34, 46, 0.4);
+        }
+        .focus-action-btn.search { background: #2da44e; }
+        .focus-action-btn.search:hover {
+            background: #1f883d;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(45, 164, 78, 0.4);
+        }
+        .focus-action-btn.picture { background: #8250df; }
+        .focus-action-btn.picture:hover {
+            background: #6639ba;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(130, 80, 223, 0.4);
+        }
+        .focus-action-btn.youglish { background: #fb8500; }
+        .focus-action-btn.youglish:hover {
+            background: #cc6a00;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(251, 133, 0, 0.4);
+        }
+        .focus-action-btn.info {
+            background: white;
+            color: #1d2329;
+            border: 1px solid #d1d9e0;
+            font-weight: 700;
+        }
+        .focus-action-btn.info:hover {
+            background: #f6f8fa;
+            border-color: #0969da;
+            color: #0969da;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.2);
+        }
+        .focus-word {
+            font-size: clamp(3rem, 13vw, 9rem);
+            font-weight: 700;
+            color: #1d2329;
+            margin: 0;
+            word-break: break-word;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .focus-phonetics {
+            display: flex;
+            gap: 24px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            font-size: clamp(1rem, 2.4vw, 1.4rem);
+            color: #57606a;
+            font-family: 'Lucida Sans Unicode', 'Lucida Grande', 'Arial Unicode MS', sans-serif;
+        }
+        .focus-phonetics .ph-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .focus-phonetics .ph-flag {
+            font-size: 0.8em;
+            font-weight: 700;
+            color: #656d76;
+        }
+        .focus-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            background: #0969da;
+            color: white;
+            font-size: 28px;
+            line-height: 1;
+            font-weight: 700;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.35);
+            transition: all 0.2s ease;
+        }
+        .focus-arrow:hover {
+            background: #0550ae;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 16px rgba(9, 105, 218, 0.45);
+        }
+        .focus-arrow:active { transform: translateY(-50%) scale(0.95); }
+        .focus-arrow.left { left: 24px; }
+        .focus-arrow.right { right: 24px; }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(13, 17, 23, 0.5);
+            backdrop-filter: blur(4px);
+            overflow-y: auto;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 560px;
+            box-shadow: 0 16px 70px rgba(13, 17, 23, 0.3);
+            animation: modalSlideIn 0.2s ease;
+        }
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-header {
+            background: #f6f8fa;
+            border-bottom: 1px solid #d1d9e0;
+            color: #1d2329;
+            padding: 18px 24px;
+            border-radius: 12px 12px 0 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1d2329;
+            text-align: left;
+            flex: 1;
+            padding-right: 36px;
+            word-break: break-word;
+        }
+        .modal-pron-btn {
+            width: 38px;
+            height: 32px;
+            padding: 0 8px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+        }
+        .modal-pron-btn.us { background: #0969da; }
+        .modal-pron-btn.us:hover {
+            background: #0550ae;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.4);
+        }
+        .modal-pron-btn.uk { background: #cf222e; }
+        .modal-pron-btn.uk:hover {
+            background: #a40e26;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(207, 34, 46, 0.4);
+        }
+        .close {
+            color: #656d76;
+            font-size: 22px;
+            font-weight: 600;
+            cursor: pointer;
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .close:hover {
+            background-color: #ebeef2;
+            color: #1d2329;
+        }
+        .modal-body {
+            padding: 20px 24px 24px 24px;
+        }
+        .meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #ebeef2;
+            font-size: 14px;
+        }
+        .meta-row .level-badge {
+            position: static;
+            transform: none;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 10px;
+        }
+        .meta-row .pos {
+            font-style: italic;
+            color: #57606a;
+        }
+        .meta-row .ph {
+            color: #1d2329;
+            font-family: 'Lucida Sans Unicode', 'Lucida Grande', 'Arial Unicode MS', sans-serif;
+        }
+        .meta-row .ph .flag {
+            color: #656d76;
+            font-weight: 700;
+            margin-right: 4px;
+            font-size: 11px;
+        }
+        .examples-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #57606a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        .examples-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .examples-list li {
+            background: #f6f8fa;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #1d2329;
+            font-size: 14px;
+            line-height: 1.5;
+            border-left: 3px solid #0969da;
+        }
+        .examples-empty {
+            color: #8b949e;
+            font-size: 13px;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        .translation-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 18px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .btn-oxford {
+            background: #1d2329;
+            color: white;
+        }
+        .btn-oxford:hover {
+            background: #000000;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+        .btn-primary { background: #0969da; color: white; }
+        .btn-primary:hover {
+            background: #0550ae;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.25);
+        }
+        .btn-secondary { background: #1f883d; color: white; }
+        .btn-secondary:hover {
+            background: #186a30;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(31, 136, 61, 0.25);
+        }
+        .btn-youglish { background: #fb8500; color: white; }
+        .btn-youglish:hover {
+            background: #cc6a00;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(251, 133, 0, 0.25);
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            .mode-switch {
+                position: static;
+                margin-bottom: 15px;
+                align-self: flex-start;
+            }
+            .header {
+                padding: 24px 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .header h1 { font-size: 1.875rem; }
+            .option-group {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+            .option-group .group-label {
+                min-width: auto;
+                text-align: center;
+                margin-bottom: 8px;
+            }
+            .option-group .choices { justify-content: center; }
+            .word-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 12px;
+                padding: 16px;
+            }
+            .word-card { padding: 52px 12px 32px 12px; }
+            .word-text { font-size: 1.25rem; }
+            .modal-content {
+                width: 95%;
+                margin: 8% auto;
+            }
+            .translation-actions { gap: 8px; }
+            .btn {
+                flex: 1;
+                min-width: 110px;
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            .focus-arrow {
+                width: 44px;
+                height: 44px;
+                font-size: 22px;
+            }
+            .focus-arrow.left { left: 8px; }
+            .focus-arrow.right { right: 8px; }
+            .focus-view {
+                padding: 56px 16px 110px 16px;
+                min-height: 50vh;
+            }
+            .focus-actions {
+                bottom: 16px;
+                gap: 8px;
+            }
+            .focus-counter {
+                right: 12px;
+                top: 12px;
+            }
+        }
+
+        /* 版权框样式 */
+        .footer {
+            margin-top: 32px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            text-align: center;
+            border-top: 2px solid #0969da;
+        }
+        .copyright {
+            font-size: 14px;
+            color: #656d76;
+            font-family: inherit;
+        }
+        .copyright a {
+            color: #0969da;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .copyright a:hover {
+            color: #0550ae;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="../index.html" class="mode-switch">🏠 Home</a>
+        <h1>📖 Oxford 5000</h1>
+        <p>Click any word to see CEFR level, IPA, audio, examples and a direct link to Oxford Learner's Dictionary.</p>
+
+        <div class="form-section date-selector">
+            <label for="dateInput">Select Date:</label>
+            <input type="date" id="dateInput">
+        </div>
+
+        <div class="form-section option-group">
+            <span class="group-label">Accent:</span>
+            <div class="choices">
+                <div class="choice-item">
+                    <input type="radio" id="accentUS" name="accent" value="us" checked>
+                    <label for="accentUS">🇺🇸 US</label>
+                </div>
+                <div class="choice-item">
+                    <input type="radio" id="accentUK" name="accent" value="uk">
+                    <label for="accentUK">🇬🇧 UK</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section option-group">
+            <span class="group-label">Focus Mode:</span>
+            <div class="choices">
+                <div class="choice-item">
+                    <input type="radio" id="focusOff" name="focusMode" value="off">
+                    <label for="focusOff">Off</label>
+                </div>
+                <div class="choice-item">
+                    <input type="radio" id="focusOn" name="focusMode" value="on" checked>
+                    <label for="focusOn">On</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="output" class="loading">Loading Oxford 5000 words...</div>
+
+    <!-- 模态框：充分利用 metadata（IPA / 音频 / 例句 / Oxford 链接） -->
+    <div id="translationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-pron-btn us" id="modalPronUsBtn" title="Play US pronunciation">🇺🇸</button>
+                <button class="modal-pron-btn uk" id="modalPronUkBtn" title="Play UK pronunciation">🇬🇧</button>
+                <h2 id="modalWordTitle"></h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="meta-row" id="modalMetaRow"></div>
+                <div class="examples-title">Examples</div>
+                <ul class="examples-list" id="modalExamplesList"></ul>
+                <div class="translation-actions">
+                    <a id="oxfordLinkBtn" class="btn btn-oxford" target="_blank" rel="noopener noreferrer" title="Open in Oxford Learner's Dictionary">
+                        📖 Oxford
+                    </a>
+                    <button id="googleSearchBtn" class="btn btn-primary" title="Search the meaning with picture on Google">
+                        🔍 Google
+                    </button>
+                    <button id="googlePictureBtn" class="btn btn-secondary" title="Search images of this word on Google">
+                        🖼️ Picture
+                    </button>
+                    <button id="youglishBtn" class="btn btn-youglish" title="Hear this word in YouTube videos on YouGlish">
+                        🎬 YouGlish
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 版权框 -->
+    <div class="footer">
+        <div class="copyright">
+            Oxford 5000 © <span id="currentYear"></span> <a href="https://guomaimang.github.io/" target="_blank">Hirsun</a>
+            &nbsp;·&nbsp; Data: <a href="https://github.com/tyypgzl/Oxford-5000-words" target="_blank" rel="noopener noreferrer">tyypgzl/Oxford-5000-words</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
