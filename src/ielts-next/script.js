@@ -17,12 +17,12 @@ function dateToSeed(dateString) {
     for (let i = 0; i < dateString.length; i++) {
         const char = dateString.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // 转换为32位整数
+        hash = hash & hash;
     }
     return Math.abs(hash);
 }
 
-// 解析CSV行数据（IELTS格式：ID,word,Chinese translation）
+// 解析CSV行数据（格式：ID,word,Chinese translation）
 function parseWordLine(line) {
     const trimmed = line.trim();
     if (!trimmed) return null;
@@ -74,14 +74,14 @@ function getRandomLinesWithSeed(lines, count, seed) {
     return result;
 }
 
-// HTML 转义函数
+// HTML 转义
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-// HTML 属性转义函数
+// HTML 属性转义
 function escapeHtmlAttr(text) {
     return String(text).replace(/&/g, '&amp;')
                        .replace(/"/g, '&quot;')
@@ -187,6 +187,7 @@ function createWordGrid(wordList, selectedDate, seed) {
                     <div class="word-card ${cardClass}" data-word="${escapeHtmlAttr(item.word)}" data-translation="${escapeHtmlAttr(item.translation)}" data-index="${index}">
                         <button class="speaker-icon" data-word="${escapeHtmlAttr(item.word)}" title="朗读单词">🔊</button>
                         <button class="search-icon" data-word="${escapeHtmlAttr(item.word)}" title="Search on Google">🔍</button>
+                        <button class="youglish-icon" data-word="${escapeHtmlAttr(item.word)}" title="Hear on YouGlish">🎬</button>
                         ${showEnglish ? `<div class="word-text">${escapeHtml(item.word)}</div>` : ''}
                         ${showChinese ? `<div class="word-translation">${escapeHtml(item.translation)}</div>` : ''}
                         <div class="word-id">${escapeHtml(item.id)}</div>
@@ -219,6 +220,7 @@ function createFocusView(wordList, selectedDate, seed) {
                     <button class="focus-action-btn speaker" id="focusSpeakerBtn" title="朗读单词">🔊</button>
                     <button class="focus-action-btn search" id="focusSearchBtn" title="Search on Google">🔍</button>
                     <button class="focus-action-btn picture" id="focusPictureBtn" title="Search images on Google">🖼️</button>
+                    <button class="focus-action-btn youglish" id="focusYouglishBtn" title="Hear on YouGlish">🎬</button>
                     <button class="focus-action-btn translate" id="focusTranslateBtn" title="查看中文翻译">T</button>
                 </div>
                 <div class="focus-counter" id="focusCounter"></div>
@@ -269,6 +271,7 @@ function setupFocusHandlers() {
     const speakerBtn = document.getElementById('focusSpeakerBtn');
     const searchBtn = document.getElementById('focusSearchBtn');
     const pictureBtn = document.getElementById('focusPictureBtn');
+    const youglishBtn = document.getElementById('focusYouglishBtn');
     const translateBtn = document.getElementById('focusTranslateBtn');
     const prevBtn = document.getElementById('focusPrevBtn');
     const nextBtn = document.getElementById('focusNextBtn');
@@ -294,6 +297,12 @@ function setupFocusHandlers() {
                 const url = `https://www.google.com/search?q=${encodeURIComponent(item.word)}&udm=2`;
                 window.open(url, '_blank', 'noopener,noreferrer');
             }
+        });
+    }
+    if (youglishBtn) {
+        youglishBtn.addEventListener('click', () => {
+            const item = currentWords[currentFocusIndex];
+            if (item && item.word) openYouglish(item.word);
         });
     }
     if (translateBtn) {
@@ -355,7 +364,7 @@ function renderCurrentMode() {
     }
 }
 
-// 处理词汇点击事件
+// 处理词汇点击
 function handleWordClick(word, translation) {
     showTranslation(word, translation);
 }
@@ -403,13 +412,24 @@ function googleMeaningSearch() {
 }
 
 // Google 图片搜索
-// 形如：https://www.google.com/search?q=apple&udm=2
 function googlePictureSearch() {
     const word = window.currentWord;
     if (!word) return;
 
     const url = `https://www.google.com/search?q=${encodeURIComponent(word)}&udm=2`;
     window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+// YouGlish：通过真实视频语境练习发音
+function openYouglish(word) {
+    if (!word) return;
+    const slug = String(word).trim().toLowerCase().replace(/\s+/g, '_');
+    const url = `https://youglish.com/pronounce/${encodeURIComponent(slug)}/english`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+function youglishSearch() {
+    openYouglish(window.currentWord);
 }
 
 // 语音相关
@@ -555,6 +575,14 @@ function handleWordGridClick(event) {
         return;
     }
 
+    const youglishBtn = event.target.closest('.youglish-icon');
+    if (youglishBtn) {
+        event.stopPropagation();
+        const word = youglishBtn.getAttribute('data-word');
+        if (word) openYouglish(word);
+        return;
+    }
+
     const wordCard = event.target.closest('.word-card');
     if (!wordCard) return;
 
@@ -621,6 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.querySelector('.close');
     const googleSearchBtn = document.getElementById('googleSearchBtn');
     const googlePictureBtn = document.getElementById('googlePictureBtn');
+    const youglishBtn = document.getElementById('youglishBtn');
     const modalSpeakerBtn = document.getElementById('modalSpeakerBtn');
 
     // 设置版权年份
@@ -681,6 +710,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Google 图片按钮：在新页面打开
     googlePictureBtn.addEventListener('click', googlePictureSearch);
 
+    // YouGlish 按钮：在新页面打开真实视频例句
+    youglishBtn.addEventListener('click', youglishSearch);
+
     // 模态框朗读按钮
     modalSpeakerBtn.addEventListener('click', speakCurrentWord);
 
@@ -694,6 +726,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.googleMeaningSearch = googleMeaningSearch;
     window.openGoogleMeaning = openGoogleMeaning;
     window.googlePictureSearch = googlePictureSearch;
+    window.openYouglish = openYouglish;
+    window.youglishSearch = youglishSearch;
     window.speakWord = speakWord;
     window.speakCurrentWord = speakCurrentWord;
 });
